@@ -13,3 +13,7 @@ html=html.replace('<button class="full" style="margin-top:24px" type="submit">',
 html=html.replace('Standalone interactive prototype · No backend, API keys, or external assets','Early preview · Firebase accounts and saved projects · Domains and plans are demonstrations');
 html=html.replace('No signup. No credit card. Just a little magic.','Explore the demo freely. Sign in and verify your email to generate with AI.');
 await writeFile('index.html',html);
+await build({entryPoints:['src/auth-action.js'],bundle:true,format:'esm',minify:true,outfile:'assets/auth-action.js',target:['es2022'],legalComments:'eof'});
+const actionVersion=createHash('sha256').update(await readFile('assets/auth-action.js')).digest('hex').slice(0,12);
+const actionPage=(await readFile('src/auth-action.html','utf8')).replace('./assets/auth-action.js',`./assets/auth-action.js?v=${actionVersion}`);
+await writeFile('auth.html',actionPage);
