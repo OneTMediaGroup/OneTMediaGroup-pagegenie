@@ -43,3 +43,4 @@ export {saveDomainSettings} from './paid-features.js';
 export {saveDomainRequest,checkDomain,reviewDomainRegistration,registerDomain,domainRegistrationStatus} from './domain-requests.js';
 
 export {createDomainCheckout,confirmDomainCheckout} from './domain-payments.js';
+export {connectDomainAfterRegistration,connectDomainAfterPlanChange,connectDomainAfterPublication,domainConnectionStatus,resolveDomain} from './domain-connection.js';
