@@ -14,9 +14,9 @@ Firebase project: `onet-pagegenie`. Firestore is in Montréal. Rules limit priva
 
 Run `npm ci`, then `npm run build`. Commit the generated `index.html` and `assets/cloud.js` for GitHub Pages. Run `npm test` for the generation service tests. The build uses `PageGenie.html` as its visual foundation.
 
-## Enable real AI later
+## Live AI configuration
 
-Real AI is disabled in `src/config.js`. The server implementation is prepared in `functions/`, but has not been deployed or tested against a paid provider.
+Real AI is enabled in `src/config.js`. The `generateWebsite` callable is deployed in Montréal and has passed a verified-account generation test using GPT-4.1 mini. Its OpenAI key is stored in Firebase Secret Manager. The instructions below describe initial setup or future reconfiguration.
 
 1. Create an OpenAI API project and enable API billing in the OpenAI platform. Create its secret key; never place it in the public repository, browser code, or chat.
 2. Enable Firebase Blaze billing for `onet-pagegenie` after reviewing costs and setting budget alerts.
@@ -29,6 +29,10 @@ The callable requires verified accounts and limits each account to ten attempts 
 
 ## Hosting
 
-The public repository is `OneTMediaGroup/OneTMediaGroup-pagegenie`. GitHub Pages publishes the root of `main`; `CNAME` selects `pagegenie.ca`. Cloudflare DNS uses an unproxied root CNAME and `www` CNAME pointing to `onetmediagroup.github.io`. GitHub must provision the domain certificate before HTTPS enforcement can be enabled. Use HTTPS for account access.
+The public repository is `OneTMediaGroup/OneTMediaGroup-pagegenie`. GitHub Pages publishes the root of `main`; `CNAME` selects `pagegenie.ca`. Cloudflare DNS uses an unproxied root CNAME and `www` CNAME pointing to `onetmediagroup.github.io`. The domain certificate is active and HTTPS enforcement is enabled. Use HTTPS for account access.
 
 Firebase client configuration is public by design; Firestore rules provide data access protection. OpenAI credentials belong only in Firebase Secret Manager.
+
+## Gary demo
+
+`Gary-demo.html` is a downloadable fictional sample with real AI-written copy, generated through the deployed callable. No domains are sold or enquiries sent.

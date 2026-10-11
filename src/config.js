@@ -5,4 +5,4 @@ export const firebaseConfig={
   "authDomain": "onet-pagegenie.firebaseapp.com",
   "messagingSenderId": "919916849261"
 };
-export const features={liveAI:false};
+export const features={liveAI:true};
