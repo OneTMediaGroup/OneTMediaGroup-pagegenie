@@ -1,3 +1,4 @@
+import {businessLink} from './business-contact.js';
 import createDOMPurify from 'dompurify';
 export function cleanComposition(input,win){
  if(!input||typeof input.html!=='string'||typeof input.css!=='string'||input.html.length>250000||input.css.length>30000)throw Error('Invalid website composition');
@@ -9,8 +10,9 @@ export function cleanComposition(input,win){
  const doc=new win.DOMParser().parseFromString(html,'text/html');
  doc.querySelectorAll('*').forEach(node=>{
   for(const attr of [...node.attributes]){
-   if(/^on/i.test(attr.name)||(/href$/i.test(attr.name)&&!/^#[a-zA-Z][\w:-]*$/.test(attr.value))||(attr.name==='src'&&!/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(attr.value)))node.removeAttribute(attr.name);
+   if(/^on/i.test(attr.name)||(/href$/i.test(attr.name)&&!/^#[a-zA-Z][\w:-]*$/.test(attr.value)&&!(node.tagName==='A'&&node.dataset.businessLink==='true'&&businessLink(attr.value)))||(attr.name==='src'&&!/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(attr.value)))node.removeAttribute(attr.name);
   }
+  if(node.tagName==='A'&&node.dataset.businessLink==='true'&&businessLink(node.getAttribute('href'))){node.setAttribute('target',node.getAttribute('href').startsWith('https:')?'_blank':'_top');node.setAttribute('rel','noopener noreferrer');}
  });
  // IDs remain local to the frame; make section controls and links deterministic.
  const used=new Set();doc.querySelectorAll('[id]').forEach((node,i)=>{if(!/^[a-zA-Z][\w:-]{0,79}$/.test(node.id)||used.has(node.id))node.id='section-'+i;used.add(node.id)});
