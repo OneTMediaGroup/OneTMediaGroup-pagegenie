@@ -25,6 +25,10 @@ service cloud.firestore {
       allow read: if owner(uid);
       allow write: if false;
     }
+    match /users/{uid}/domainRequests/{id} {
+      allow read: if owner(uid);
+      allow write: if false;
+    }
     match /users/{uid}/domainSettings/{id} {
       allow read: if owner(uid);
       allow write: if false;

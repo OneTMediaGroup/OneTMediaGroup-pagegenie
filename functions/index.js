@@ -40,3 +40,4 @@ export const uploadLogo=onCall(logoOptions,async request=>{
 export {createCheckout,billingStatus,createBillingPortal,stripeWebhook} from './billing.js';
 export {downloadWebsite,promotionalKit,publishWebsite,websiteAnalytics,recordSiteEvent} from './paid-features.js';
 export {saveDomainSettings} from './paid-features.js';
+export {saveDomainRequest} from './domain-requests.js';

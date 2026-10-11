@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {domainName,registrantDetails,cloudflareQuote} from '../functions/domain-registration.js';
+const owner={domain:'Northline.ca',name:'QA Owner',email:'qa@example.com',phone:'+1 705 555 0100',street:'1 Example Street',city:'Barrie',region:'ON',postalCode:'L4M 1A1',country:'CA'};
+test('Domain owner validation rejects malformed domains and missing contact details',()=>{assert.equal(domainName('https://Northline.ca/'),'northline.ca');for(const invalid of ['example.ca/path','-name.ca','name..ca','name.ca?x=1'])assert.throws(()=>domainName(invalid));assert.equal(registrantDetails(owner).domain,'northline.ca');assert.throws(()=>registrantDetails({...owner,email:''}));assert.throws(()=>registrantDetails({...owner,country:'Canada'}));});
+const args={accountId:'a'.repeat(32),token:'fixture',domain:'northline.com'};
+const response=item=>async()=>({ok:true,json:async()=>({success:true,result:{domains:[item]}})});
+test('Registrar quotes retain currency and separate the CAD service fee',async()=>{const q=await cloudflareQuote({...args,fetcher:response({name:args.domain,registrable:true,pricing:{registration_cost:'10.44',renewal_cost:'10.44',currency:'USD'}})});assert.equal(q.registrarAmount,10.44);assert.equal(q.currency,'USD');assert.equal(q.serviceFee,2);assert.equal(q.serviceFeeCurrency,'CAD');assert.ok(q.expiresAt>q.quotedAt);});
+test('Unavailable domains and incomplete registrar responses never become available guesses',async()=>{assert.equal((await cloudflareQuote({...args,fetcher:response({name:args.domain,registrable:false,reason:'unavailable'})})).available,false);await assert.rejects(cloudflareQuote({...args,fetcher:response({name:args.domain,registrable:true})}));await assert.rejects(cloudflareQuote({...args,fetcher:response({name:'different.com',registrable:true})}));await assert.rejects(cloudflareQuote({...args,token:''}));});
