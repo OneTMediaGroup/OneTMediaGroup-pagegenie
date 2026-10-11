@@ -2,7 +2,7 @@ import {onRequest} from 'firebase-functions/v2/https';
 import {getFirestore} from 'firebase-admin/firestore';
 import {JSDOM} from 'jsdom';
 import {entitlements} from './entitlements.js';
-import {cleanComposition,exportDocument} from './shared/composition-safety.js';
+import {cleanComposition,exportDocument,mediaComposition} from './shared/composition-safety.js';
 export function requestHostname(headers){const value=headers['x-forwarded-host']||headers.host;return typeof value==='string'&&/^[a-z0-9.-]+(?::\d+)?$/i.test(value)?value.toLowerCase().replace(/:\d+$/,''):null;}
 export async function hostedDocument(host,db=getFirestore()){
  if(!host||host.length>253)return null;
@@ -11,10 +11,10 @@ export async function hostedDocument(host,db=getFirestore()){
  const [publicDoc,billingDoc]=await Promise.all([db.doc('publishedSites/'+mapping.projectId).get(),db.doc(`users/${mapping.uid}/billing/${mapping.projectId}`).get()]);
  const site=publicDoc.data();if(!site?.hosting||site.ownerId!==mapping.uid||!entitlements(billingDoc.data()).customDomain)return null;
  const draft=JSON.parse(site.draft),win=new JSDOM('').window;
- try{return exportDocument(cleanComposition(draft.composition,win),site.name);}finally{win.close();}
+ try{return exportDocument(mediaComposition(cleanComposition(draft.composition,win),win,host),site.name);}finally{win.close();}
 }
 export const customerWebsite=onRequest({region:'northamerica-northeast1',memory:'512MiB',maxInstances:3,timeoutSeconds:30,cors:false},async(req,res)=>{
- res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','Strict-Transport-Security':'max-age=31536000','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"});
+ res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','Strict-Transport-Security':'max-age=31536000','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-src https://www.youtube-nocookie.com https://player.twitch.tv; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"});
  if(!['GET','HEAD'].includes(req.method)){res.set('Allow','GET, HEAD').status(405).send('Method not allowed');return;}
  if(req.path!=='/'&&req.path!=='/index.html'){res.status(404).send('Page not found');return;}
  try{const html=await hostedDocument(requestHostname(req.headers));if(!html){res.status(404).send('This website is unavailable or has not been published.');return;}res.type('html').status(200).send(html);}catch{res.status(503).send('This website is temporarily unavailable. Please try again shortly.');}

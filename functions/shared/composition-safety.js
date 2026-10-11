@@ -1,3 +1,4 @@
+import {hydrateMedia,parseMedia} from './creator-media.js';
 import {businessLink} from './business-contact.js';
 import createDOMPurify from 'dompurify';
 export function cleanComposition(input,win){
@@ -10,9 +11,9 @@ export function cleanComposition(input,win){
  const doc=new win.DOMParser().parseFromString(html,'text/html');
  doc.querySelectorAll('*').forEach(node=>{
   for(const attr of [...node.attributes]){
-   if(/^on/i.test(attr.name)||(/href$/i.test(attr.name)&&!/^#[a-zA-Z][\w:-]*$/.test(attr.value)&&!(node.tagName==='A'&&node.dataset.businessLink==='true'&&businessLink(attr.value)))||(attr.name==='src'&&!/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(attr.value)))node.removeAttribute(attr.name);
+   if(/^on/i.test(attr.name)||(/href$/i.test(attr.name)&&!/^#[a-zA-Z][\w:-]*$/.test(attr.value)&&!(node.tagName==='A'&&node.dataset.businessLink==='true'&&(businessLink(attr.value)||parseMedia(attr.value))))||(attr.name==='src'&&!/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(attr.value)))node.removeAttribute(attr.name);
   }
-  if(node.tagName==='A'&&node.dataset.businessLink==='true'&&businessLink(node.getAttribute('href'))){node.setAttribute('target',node.getAttribute('href').startsWith('https:')?'_blank':'_top');node.setAttribute('rel','noopener noreferrer');}
+  if(node.tagName==='A'&&node.dataset.businessLink==='true'&&(businessLink(node.getAttribute('href'))||parseMedia(node.getAttribute('href')))){node.setAttribute('target',node.getAttribute('href').startsWith('https:')?'_blank':'_top');node.setAttribute('rel','noopener noreferrer');}
  });
  // IDs remain local to the frame; make section controls and links deterministic.
  const used=new Set();doc.querySelectorAll('[id]').forEach((node,i)=>{if(!/^[a-zA-Z][\w:-]{0,79}$/.test(node.id)||used.has(node.id))node.id='section-'+i;used.add(node.id)});
@@ -23,4 +24,6 @@ export function cleanComposition(input,win){
  return {concept:String(input.concept||'Custom website').slice(0,600),html:doc.body.innerHTML,css:responsiveCSS+(responsiveCSS.includes('/* PageGenie responsive guard */')?'':'\n'+guard)};
 }
 export function escapeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-export function exportDocument(composition,title){return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:; base-uri \'none\'; form-action \'none\'"><title>'+escapeText(title)+'</title><style>'+composition.css+'</style></head><body>'+composition.html+'</body></html>';}
+export function exportDocument(composition,title){return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:; frame-src https://www.youtube-nocookie.com https://player.twitch.tv; base-uri \'none\'; form-action \'none\'"><title>'+escapeText(title)+'</title><style>'+composition.css+'</style></head><body>'+composition.html+'</body></html>';}
+
+export function mediaComposition(composition,win,hostname=''){const doc=new win.DOMParser().parseFromString(composition.html,'text/html');hydrateMedia(doc,hostname);return {...composition,html:doc.body.innerHTML};}
