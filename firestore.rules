@@ -21,6 +21,10 @@ service cloud.firestore {
         allow write: if false;
       }
     }
+    match /users/{uid}/billing/{id} {
+      allow read: if owner(uid);
+      allow write: if false;
+    }
     match /publishedSites/{id} {
       allow get: if true;
       allow list: if false;

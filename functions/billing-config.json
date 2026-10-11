@@ -1,0 +1,30 @@
+{
+  "testMode": true,
+  "portalConfiguration": "bpc_1UPU7j1uRlTVrdiryiOTIjYg",
+  "plans": {
+    "starter": {
+      "name": "PageGenie Starter",
+      "amount": 900,
+      "currency": "cad",
+      "mode": "subscription",
+      "priceId": "price_1UPU7i1uRlTVrdirUohZ6JeM",
+      "productId": "prod_VQKngxNnpLqqo0"
+    },
+    "complete": {
+      "name": "PageGenie Complete",
+      "amount": 1900,
+      "currency": "cad",
+      "mode": "subscription",
+      "priceId": "price_1UPU7i1uRlTVrdirjousO201",
+      "productId": "prod_VQKn7xbyGaVk9s"
+    },
+    "html": {
+      "name": "PageGenie Own Your HTML",
+      "amount": 4900,
+      "currency": "cad",
+      "mode": "payment",
+      "priceId": "price_1UPU7j1uRlTVrdirPP6mkXEX",
+      "productId": "prod_VQKnJk12pRrMvV"
+    }
+  }
+}
