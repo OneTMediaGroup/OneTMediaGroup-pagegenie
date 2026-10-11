@@ -1,0 +1,12 @@
+import {build} from 'esbuild';
+import {readFile,writeFile} from 'node:fs/promises';
+await build({entryPoints:['src/cloud.js'],bundle:true,format:'esm',minify:true,outfile:'assets/cloud.js',target:['es2022'],legalComments:'eof'});
+let html=await readFile('PageGenie.html','utf8');
+const ui=await readFile('src/account.html','utf8');
+const bodyEnd=html.lastIndexOf('</body>');
+html=html.slice(0,bodyEnd)+ui+'<script type="module" src="./assets/cloud.js"></script>'+html.slice(bodyEnd);
+html=html.replace('<span class="badge">INTERACTIVE DEMO</span>','<span class="badge">EARLY PREVIEW</span><button class="ghost" id="accountButton" onclick="openAccount()">Sign in</button>');
+html=html.replace('<main class="wrap">','<main class="wrap"><div class="toolbar"><span class="small" id="cloudStatus">Connecting account services…</span><div class="row"><button class="secondary" onclick="cloudSave()">Save to account</button><button class="secondary" onclick="publishCloud()">Publish shareable preview ↗</button></div></div>');
+html=html.replace('<button class="full" style="margin-top:24px" type="submit">','<label class="label" for="generationMode">Generation mode</label><select id="generationMode"><option value="demo">Explore the demo</option><option value="live">Generate with AI</option></select><button class="full" style="margin-top:24px" type="submit">');
+html=html.replace('Standalone interactive prototype · No backend, API keys, or external assets','Early preview · Firebase accounts and saved projects · Domains and plans are demonstrations');
+await writeFile('index.html',html);
