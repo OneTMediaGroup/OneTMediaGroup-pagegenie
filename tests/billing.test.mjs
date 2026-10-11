@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import Stripe from '../functions/node_modules/stripe/esm/stripe.esm.node.js';
+import config from '../functions/billing-config.json' with {type:'json'};
+test('Launch checkout charges CAD 9/19 monthly and 49 once, one Stripe price per plan',()=>{assert.equal(config.testMode,true);assert.deepEqual(Object.values(config.plans).map(p=>[p.amount,p.currency,p.mode]),[[900,'cad','subscription'],[1900,'cad','subscription'],[4900,'cad','payment']]);assert.equal(new Set(Object.values(config.plans).map(p=>p.priceId)).size,3);});
+test('Stripe rejects forged or modified webhook bodies and accepts signed raw bytes',()=>{const stripe=new Stripe('sk_test_placeholder'),secret='whsec_disposable_unit_test';const payload=JSON.stringify({id:'evt_test',type:'checkout.session.completed',livemode:false,data:{object:{payment_status:'paid'}}});const signature=stripe.webhooks.generateTestHeaderString({payload,secret});assert.equal(stripe.webhooks.constructEvent(Buffer.from(payload),signature,secret).id,'evt_test');assert.throws(()=>stripe.webhooks.constructEvent(payload.replace('paid','unpaid'),signature,secret));assert.throws(()=>stripe.webhooks.constructEvent(payload,signature,'whsec_wrong'));});
