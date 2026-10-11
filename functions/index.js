@@ -45,3 +45,5 @@ export {saveDomainRequest,checkDomain,reviewDomainRegistration,registerDomain,do
 export {createDomainCheckout,confirmDomainCheckout} from './domain-payments.js';
 export {connectDomainAfterRegistration,connectDomainAfterPlanChange,connectDomainAfterPublication,domainConnectionStatus,resolveDomain} from './domain-connection.js';
 export {customerWebsite} from './customer-hosting.js';
+
+export {designVersions} from './design-history.js';

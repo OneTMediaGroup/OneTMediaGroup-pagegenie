@@ -21,6 +21,14 @@ service cloud.firestore {
         allow write: if false;
       }
     }
+    match /users/{uid}/designHistories/{id} {
+      allow read: if owner(uid);
+      allow write: if false;
+      match /versions/{versionId} {
+        allow read: if owner(uid);
+        allow write: if false;
+      }
+    }
     match /users/{uid}/billing/{id} {
       allow read: if owner(uid);
       allow write: if false;
