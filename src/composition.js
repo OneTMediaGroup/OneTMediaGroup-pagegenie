@@ -1,5 +1,5 @@
 import {cleanComposition,escapeText,exportDocument} from './composition-safety.js';
-let composition=null,frame=null,mobile=false,editing=true,onChange=()=>{},selectedImage=null;
+let composition=null,frame=null,mobile=window.innerWidth<=800,editing=true,onChange=()=>{},selectedImage=null;
 const el=id=>document.getElementById(id);
 export const getComposition=()=>composition?{...composition}:null;
 export const compositionText=()=>{if(!composition)return null;const doc=parse();doc.querySelectorAll('img').forEach(n=>n.removeAttribute('src'));return JSON.stringify({...composition,html:doc.body.innerHTML}).slice(0,60000);};
