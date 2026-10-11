@@ -3,6 +3,7 @@ import {createHash} from 'node:crypto';
 import {readFile,writeFile} from 'node:fs/promises';
 await build({entryPoints:['src/cloud.js'],bundle:true,format:'esm',minify:true,outfile:'assets/cloud.js',target:['es2022'],legalComments:'eof'});
 let html=await readFile('PageGenie.html','utf8');
+html=html.replace('</head>',`<script>if(new URLSearchParams(location.search).has('domain')||new URLSearchParams(location.search).has('site'))document.documentElement.dataset.publicOpening='true';</script><style>html[data-public-opening] main,html[data-public-opening] header{visibility:hidden}</style></head>`);
 const ui=await readFile('src/account.html','utf8');
 const bundleVersion=createHash('sha256').update(await readFile('assets/cloud.js')).digest('hex').slice(0,12);
 const bodyEnd=html.lastIndexOf('</body>');

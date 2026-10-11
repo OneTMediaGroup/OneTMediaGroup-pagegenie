@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import {connectRegisteredDomain} from './domain-connection.js';
 import {onCall,HttpsError} from 'firebase-functions/v2/https';
 import {defineSecret} from 'firebase-functions/params';
 import {getFirestore} from 'firebase-admin/firestore';
@@ -22,12 +23,13 @@ export async function processDomainPayment(sessionId,uid,projectId,deps={}){
  const db=deps.db||getFirestore(),ref=db.doc(`users/${uid}/domainOrders/${projectId}`),s=deps.stripe||stripe();let order=(await ref.get()).data();if(!order)throw Error('Domain order unavailable.');
  const session=await s.checkout.sessions.retrieve(sessionId,{expand:['payment_intent.latest_charge']});
  if(!confirmedDomainPayment(session,order,uid))throw new HttpsError('failed-precondition','Stripe has not confirmed this domain payment.');
- if(['registered','pending','unknown','submitting','refunded'].includes(order.status))return order;
+ if(order.status==='registered'){try{await connectRegisteredDomain(uid,projectId,db);}catch{}return order;}
+ if(['pending','unknown','submitting','refunded'].includes(order.status))return order;
  if(order.status==='refund-pending')return refundOrder(ref,order,s,order.refundReason||'Registrar could not complete registration.');
  const charge=session.payment_intent?.latest_charge;if(charge?.refunded||charge?.amount_refunded>0){await ref.update({status:'refunded',paymentStatus:'refunded'});return (await ref.get()).data();}
  let claimed=false;await db.runTransaction(async tx=>{const current=(await tx.get(ref)).data();if(current?.orderId!==order.orderId||current.status!=='checkout')return;order={...current,status:'submitting',paymentStatus:'paid',paidAt:Date.now(),paymentIntentId:session.payment_intent.id,paidAmountCents:session.amount_total};tx.set(ref,order);claimed=true;});if(!claimed)return (await ref.get()).data();
  let fresh;try{fresh=await (deps.quote||quote)(order);}catch{return refundOrder(ref,order,s,'Registrar availability could not be confirmed before registration.');}if(!sameDomainPrice(order.quote,fresh))return refundOrder(ref,order,s,'Domain availability or price changed before registration.');
- try{const workflow=deps.registrar?await deps.registrar(order.details):await sandboxRegistrar({accountId,token:registrarKey.value(),details:order.details});const status=workflow.state==='succeeded'?'registered':workflow.state==='failed'?'failed':'pending';if(status==='failed')return refundOrder(ref,order,s,'Registrar rejected the registration.');const receipt={...order,status,workflowState:workflow.state,registeredAt:status==='registered'?Date.now():null,expiresAt:workflow.context?.registration?.expires_at||null};await ref.set(receipt);await db.doc(`users/${uid}/domainRequests/${projectId}`).update({status});return receipt;
+ try{const workflow=deps.registrar?await deps.registrar(order.details):await sandboxRegistrar({accountId,token:registrarKey.value(),details:order.details});const status=workflow.state==='succeeded'?'registered':workflow.state==='failed'?'failed':'pending';if(status==='failed')return refundOrder(ref,order,s,'Registrar rejected the registration.');const receipt={...order,status,workflowState:workflow.state,registeredAt:status==='registered'?Date.now():null,expiresAt:workflow.context?.registration?.expires_at||null};await ref.set(receipt);await db.doc(`users/${uid}/domainRequests/${projectId}`).update({status});if(status==='registered'){try{await connectRegisteredDomain(uid,projectId,db);}catch{}}return receipt;
  }catch(e){if((await ref.get()).data()?.status==='submitting')await ref.update({status:'unknown'});throw e;}
 }
 export async function completeDomainCheckout(r){const {ref,id}=await registrationContext(r);const order=(await ref.get()).data();if(!order?.sessionId)throw new HttpsError('failed-precondition','Pay for the domain before registering.');return processDomainPayment(order.sessionId,r.auth.uid,id);}
