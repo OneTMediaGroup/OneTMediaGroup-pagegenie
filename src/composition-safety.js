@@ -1,6 +1,6 @@
 import createDOMPurify from 'dompurify';
 export function cleanComposition(input,win){
- if(!input||typeof input.html!=='string'||typeof input.css!=='string'||input.html.length>65000||input.css.length>30000)throw Error('Invalid website composition');
+ if(!input||typeof input.html!=='string'||typeof input.css!=='string'||input.html.length>250000||input.css.length>30000)throw Error('Invalid website composition');
  // CSS has no network or executable capabilities. The frame also enforces a CSP.
  const css=input.css.replace(/\\([0-9a-f]{1,6})\s?/gi,(_,hex)=>String.fromCodePoint(Math.min(parseInt(hex,16),0x10ffff))).replace(/\\([^\n\r])/g,'$1');
  if(/</.test(css)||/url\s*\(|@import|@font-face|expression\s*\(|-moz-binding|behavior\s*:/i.test(css))throw Error('Unsupported website styles');
