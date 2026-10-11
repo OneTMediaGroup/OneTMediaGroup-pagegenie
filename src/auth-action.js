@@ -15,7 +15,8 @@ else try {
   const action=actionMode(mode,info.operation);
   if(action==='verifyEmail'){
     await applyActionCode(auth,code);
-    show('Your email is verified!','Your Genie is ready. Return to PageGenie and choose Generate with AI. If your account is open in another tab, you can continue there.');
+    show('Your email is verified!','Taking you back to PageGenie…');
+    setTimeout(()=>location.replace('./?verified=1'),1200);
   }else if(action==='resetPassword'){
     await verifyPasswordResetCode(auth,code);
     show('Choose a new password','Use at least eight characters for your PageGenie account.');
