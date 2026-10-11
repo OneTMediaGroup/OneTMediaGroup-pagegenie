@@ -41,3 +41,5 @@ export {createCheckout,billingStatus,createBillingPortal,stripeWebhook} from './
 export {downloadWebsite,promotionalKit,publishWebsite,websiteAnalytics,recordSiteEvent} from './paid-features.js';
 export {saveDomainSettings} from './paid-features.js';
 export {saveDomainRequest,checkDomain,reviewDomainRegistration,registerDomain,domainRegistrationStatus} from './domain-requests.js';
+
+export {createDomainCheckout,confirmDomainCheckout} from './domain-payments.js';

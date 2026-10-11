@@ -1,0 +1,34 @@
+import Stripe from 'stripe';
+import {onCall,HttpsError} from 'firebase-functions/v2/https';
+import {defineSecret} from 'firebase-functions/params';
+import {getFirestore} from 'firebase-admin/firestore';
+import {registrationContext} from './domain-requests.js';
+import {domainCheckoutParameters,confirmedDomainPayment} from './domain-pricing.js';
+import {cloudflareQuote,sameDomainPrice,sandboxRegistrar} from './domain-registration.js';
+const stripeKey=defineSecret('STRIPE_SECRET_KEY'),registrarKey=defineSecret('CLOUDFLARE_SANDBOX_TOKEN');
+const options={region:'northamerica-northeast1',timeoutSeconds:120,maxInstances:2,secrets:[stripeKey,registrarKey],cors:['https://pagegenie.ca','https://www.pagegenie.ca','https://onetmediagroup.github.io']};
+const accountId='73c71b31767e4449bb22322ce64c7ef8';
+function stripe(){if(!stripeKey.value().startsWith('sk_test_'))throw new HttpsError('failed-precondition','Only Stripe test payments are enabled.');return new Stripe(stripeKey.value(),{apiVersion:'2024-06-20'});}
+async function quote(order){return cloudflareQuote({accountId,token:registrarKey.value(),domain:order.details.domain,sandbox:true});}
+export const createDomainCheckout=onCall(options,async r=>{
+ const {db,ref}=await registrationContext(r),s=stripe();let order;
+ await db.runTransaction(async tx=>{order=(await tx.get(ref)).data();if(!order||order.orderId!==r.data?.orderId)throw new HttpsError('failed-precondition','Review the domain and price first.');if(order.status==='checkout'&&order.sessionId)return;if(order.status!=='review')throw new HttpsError('failed-precondition','Check the existing domain order first.');if(order.quote.expiresAt<Date.now())throw new HttpsError('failed-precondition','Price expired. Review the domain again.');tx.update(ref,{status:'checkout-opening'});});
+ if(order.sessionId&&order.status==='checkout'){const prior=await s.checkout.sessions.retrieve(order.sessionId);if(prior.status==='open')return {url:prior.url};if(prior.status==='complete')throw new HttpsError('failed-precondition','Payment completed. Check registration status.');await ref.update({status:'review',sessionId:null});throw new HttpsError('failed-precondition','Checkout expired. Review the domain again.');}
+ try{if(!sameDomainPrice(order.quote,await quote(order))){await ref.update({status:'price-changed'});throw new HttpsError('failed-precondition','Domain availability or registrar price changed. Review again.');}const session=await s.checkout.sessions.create(domainCheckoutParameters(order,r.auth.uid,r.auth.token.email),{idempotencyKey:'pagegenie-domain-'+order.orderId});await ref.update({sessionId:session.id,status:'checkout',checkoutExpiresAt:session.expires_at*1000});return {url:session.url};}catch(e){if((await ref.get()).data()?.status==='checkout-opening')await ref.update({status:'review'});throw e;}
+});
+async function refundOrder(ref,order,s,reason){await ref.update({status:'refund-pending',paymentStatus:'refund-pending',refundReason:reason});const refund=await s.refunds.create({payment_intent:order.paymentIntentId},{idempotencyKey:'pagegenie-domain-refund-'+order.orderId});await ref.update({status:'refunded',paymentStatus:'refunded',refundId:refund.id});return (await ref.get()).data();}
+export async function refundFailedDomain(ref,order){return refundOrder(ref,order,stripe(),'Registrar rejected the registration.');}
+export async function processDomainPayment(sessionId,uid,projectId,deps={}){
+ const db=deps.db||getFirestore(),ref=db.doc(`users/${uid}/domainOrders/${projectId}`),s=deps.stripe||stripe();let order=(await ref.get()).data();if(!order)throw Error('Domain order unavailable.');
+ const session=await s.checkout.sessions.retrieve(sessionId,{expand:['payment_intent.latest_charge']});
+ if(!confirmedDomainPayment(session,order,uid))throw new HttpsError('failed-precondition','Stripe has not confirmed this domain payment.');
+ if(['registered','pending','unknown','submitting','refunded'].includes(order.status))return order;
+ if(order.status==='refund-pending')return refundOrder(ref,order,s,order.refundReason||'Registrar could not complete registration.');
+ const charge=session.payment_intent?.latest_charge;if(charge?.refunded||charge?.amount_refunded>0){await ref.update({status:'refunded',paymentStatus:'refunded'});return (await ref.get()).data();}
+ let claimed=false;await db.runTransaction(async tx=>{const current=(await tx.get(ref)).data();if(current?.orderId!==order.orderId||current.status!=='checkout')return;order={...current,status:'submitting',paymentStatus:'paid',paidAt:Date.now(),paymentIntentId:session.payment_intent.id,paidAmountCents:session.amount_total};tx.set(ref,order);claimed=true;});if(!claimed)return (await ref.get()).data();
+ let fresh;try{fresh=await (deps.quote||quote)(order);}catch{return refundOrder(ref,order,s,'Registrar availability could not be confirmed before registration.');}if(!sameDomainPrice(order.quote,fresh))return refundOrder(ref,order,s,'Domain availability or price changed before registration.');
+ try{const workflow=deps.registrar?await deps.registrar(order.details):await sandboxRegistrar({accountId,token:registrarKey.value(),details:order.details});const status=workflow.state==='succeeded'?'registered':workflow.state==='failed'?'failed':'pending';if(status==='failed')return refundOrder(ref,order,s,'Registrar rejected the registration.');const receipt={...order,status,workflowState:workflow.state,registeredAt:status==='registered'?Date.now():null,expiresAt:workflow.context?.registration?.expires_at||null};await ref.set(receipt);await db.doc(`users/${uid}/domainRequests/${projectId}`).update({status});return receipt;
+ }catch(e){if((await ref.get()).data()?.status==='submitting')await ref.update({status:'unknown'});throw e;}
+}
+export async function completeDomainCheckout(r){const {ref,id}=await registrationContext(r);const order=(await ref.get()).data();if(!order?.sessionId)throw new HttpsError('failed-precondition','Pay for the domain before registering.');return processDomainPayment(order.sessionId,r.auth.uid,id);}
+export const confirmDomainCheckout=onCall(options,completeDomainCheckout);
