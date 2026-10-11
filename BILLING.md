@@ -10,4 +10,9 @@ Signed raw-body webhooks and authenticated server reconciliation store payment s
 
 Live checks completed: guest/invalid-plan/missing-project rejection; all three hosted checkouts; unpaid status; invalid webhook signature; declined test card; checkout cancellation with project restoration; successful CAD 19 subscription with automatic return; saved paid state; signed duplicate webhook deliveries; customer portal and cancellation at period end. Existing application tests plus billing price/signature checks: 32 passing.
 
-This is payment integration testing, not a production billing launch. Paid feature enforcement, actual visitor analytics, custom-domain provisioning, tax configuration, refunds, production keys/prices and live-payment rollout remain separate work. Free accounts, verified-account PNG logo downloads and shareable previews remain available.
+This is payment integration testing, not a production billing launch. Server-enforced hosting, real page-view/enquiry-click analytics, Complete-only promotional kits and domain preferences, and HTML-only export are connected. Refunded HTML purchases and ended subscriptions lose paid access. Custom-domain provisioning, tax configuration, production keys/prices and live-payment rollout remain separate work. Free accounts, verified-account PNG logo downloads and shareable previews remain available.
+
+
+Paid-feature checks: free/guest/project-isolation/forged entitlement rejection; real $49 test checkout unlocked sanitized server export; a test refund locked it again; a real Stripe test Starter subscription unlocked hosting and analytics while blocking HTML/kit/domain settings; cancellation locked paid access; view deduplication and stored counts passed. Complete publishing and promotional copy verified in the browser. Unit suite: 35 passing.
+
+Visible website content and draft backups remain available in the editor; the paid service is the official standalone export. A client-rendered website cannot prevent someone from manually copying visible content.
