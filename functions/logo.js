@@ -3,7 +3,7 @@ export const LOGO_ALLOWANCE=3;
 export function logoRequest(input){
  if(!input||!/^[-a-zA-Z0-9]{20,50}$/.test(input.projectId||'')||!/^[-a-zA-Z0-9]{20,50}$/.test(input.requestId||''))throw Error('Invalid logo project');
  const clean={projectId:input.projectId,requestId:input.requestId};
- for(const [name,max] of Object.entries({business:70,description:1200,services:200,location:100,direction:400})){const value=input[name]??'';if(typeof value!=='string'||value.length>max)throw Error('Invalid logo details');clean[name]=value.trim();}
+ for(const [name,max] of Object.entries({business:70,description:1200,services:200,location:100,direction:400,website:2500})){const value=input[name]??'';if(typeof value!=='string'||value.length>max)throw Error('Invalid logo details');clean[name]=value.trim();}
  if(!clean.business)throw Error('Business name is required');
  clean.accent=/^#[a-f0-9]{6}$/i.test(input.accent||'')?input.accent:'#285e94';return clean;
 }
