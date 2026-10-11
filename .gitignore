@@ -5,3 +5,6 @@ node_modules/
 !.env.example
 firebase-debug.log*
 .firebase/
+
+# Local generation smoke-test artifacts (never needed by the public site)
+work/

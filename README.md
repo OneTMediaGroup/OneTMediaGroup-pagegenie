@@ -40,3 +40,12 @@ Firebase client configuration is public by design; Firestore rules provide data 
 ## Email verification recovery
 
 Firebase currently rejects changes to its default email callback URL with `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`. Account emails therefore retain the default Firebase destination. If a mail client fails to open the link, signed-in users can expand **Verification link not opening?** in My projects and paste the full link there. PageGenie validates the host, project, action type, and account email, then redeems the one-time code directly with Firebase. The link is cleared immediately and is not saved in drafts. `auth.html` is a prepared standalone handler; it is not the default email destination until Firebase permits the callback change.
+
+
+### Custom website composition
+
+Live generation now asks OpenAI GPT-4.1 for original HTML, CSS, section structure and inline SVG art for each business; it does not select one of the old four visual templates. Responses remain structured and validated. Account verification and daily limits still apply. Generation can take a minute or two. Model selection remains configurable through OPENAI_MODEL in the functions environment.
+
+Custom pages are sanitized with DOMPurify and displayed in an opaque-origin sandboxed iframe. Only the app-owned editing/resize bridge executes, with a nonce-based CSP; generated scripts, forms, external resources and external links are excluded. Inline edits, uploaded hero photographs, section ordering/visibility, themes, mobile preview, JSON backup/restore, private cloud projects, public shareable previews and standalone HTML export retain custom HTML/CSS. Legacy saved projects remain compatible. Uploaded photos are resized and compressed; cloud drafts retain the existing 650 KB payload limit.
+
+These are generated first drafts, not a guarantee that every layout is perfect or unique. Review business claims and responsive design before publishing. Contact invitations remain previews until contact details or enquiry services are connected. Domain purchasing, billing plans and visitor analytics are still demonstrations.

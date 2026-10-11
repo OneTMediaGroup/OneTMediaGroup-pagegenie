@@ -5,8 +5,8 @@ import {getFirestore,FieldValue} from 'firebase-admin/firestore';
 import {intake,generateCopy} from './generation.js';
 initializeApp();
 const OPENAI_API_KEY=defineSecret('OPENAI_API_KEY');
-const OPENAI_MODEL=defineString('OPENAI_MODEL',{default:'gpt-4.1-mini'});
-export const generateWebsite=onCall({region:'northamerica-northeast1',secrets:[OPENAI_API_KEY],timeoutSeconds:120,memory:'256MiB',maxInstances:2,concurrency:4,cors:['https://pagegenie.ca','https://www.pagegenie.ca','https://onetmediagroup.github.io']},async request=>{
+const OPENAI_MODEL=defineString('OPENAI_MODEL',{default:'gpt-4.1'});
+export const generateWebsite=onCall({region:'northamerica-northeast1',secrets:[OPENAI_API_KEY],timeoutSeconds:240,memory:'256MiB',maxInstances:2,concurrency:4,cors:['https://pagegenie.ca','https://www.pagegenie.ca','https://onetmediagroup.github.io']},async request=>{
  if(!request.auth)throw new HttpsError('unauthenticated','Sign in to generate a website.');
  if(request.auth.token.email_verified!==true)throw new HttpsError('failed-precondition','Verify your email before generating a website.');
  let data;try{data=intake(request.data)}catch{throw new HttpsError('invalid-argument','Check your business details and try again.');}
