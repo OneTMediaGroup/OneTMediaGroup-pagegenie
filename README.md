@@ -36,3 +36,7 @@ Firebase client configuration is public by design; Firestore rules provide data 
 ## Gary demo
 
 `Gary-demo.html` is a downloadable fictional sample with real AI-written copy, generated through the deployed callable. No domains are sold or enquiries sent.
+
+## Email verification recovery
+
+Firebase currently rejects changes to its default email callback URL with `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`. Account emails therefore retain the default Firebase destination. If a mail client fails to open the link, signed-in users can expand **Verification link not opening?** in My projects and paste the full link there. PageGenie validates the host, project, action type, and account email, then redeems the one-time code directly with Firebase. The link is cleared immediately and is not saved in drafts. `auth.html` is a prepared standalone handler; it is not the default email destination until Firebase permits the callback change.

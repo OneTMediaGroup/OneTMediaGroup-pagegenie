@@ -1,9 +1,10 @@
 import {initializeApp} from 'firebase/app';
-import {getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,sendPasswordResetEmail,sendEmailVerification,signOut} from 'firebase/auth';
+import {getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,sendPasswordResetEmail,sendEmailVerification,signOut,checkActionCode,applyActionCode} from 'firebase/auth';
 import {getFirestore,collection,doc,setDoc,getDoc,getDocs,deleteDoc,serverTimestamp} from 'firebase/firestore';
 import {getFunctions,httpsCallable} from 'firebase/functions';
 import QRCode from 'qrcode';
 import {firebaseConfig,features} from './config.js';
+import {verificationLink} from './email-action.js';
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),functions=getFunctions(app,'northamerica-northeast1');
 let user=null,projectId=null,publishedURL='',busy=false;
 const el=id=>document.getElementById(id);
@@ -16,6 +17,10 @@ el('accountForm').onsubmit=e=>{e.preventDefault();action(async()=>{await signInW
 el('createAccount').onclick=()=>{if(!el('accountForm').reportValidity())return;action(async()=>{await createUserWithEmailAndPassword(auth,el('accountEmail').value,el('accountPassword').value);el('accountPassword').value='';message('Account created. Use “Send verification email” before publishing.');})};
 el('resetPassword').onclick=()=>action(async()=>{const email=el('accountEmail').value.trim();if(!email){message('Enter your email address first.');return}await sendPasswordResetEmail(auth,email);message('If this account exists, a reset email is on its way.');});
 el('verifyEmail').onclick=()=>action(async()=>{if(!user)return;await user.reload();await user.getIdToken(true);if(user.emailVerified){message('Your email is verified. You’re ready to publish.');return}await sendEmailVerification(user);message('Verification email sent. Follow the link, then come back and publish.');});
+const verifyHelp=document.createElement('details');
+verifyHelp.innerHTML='<summary style="cursor:pointer;margin-top:18px">Verification link not opening?</summary><p class="small">Copy the full link from your verification email and paste it here. PageGenie will securely check it with Firebase. Do not share the link in chat.</p><form id="verifyLinkForm"><label class="label" for="verifyLinkInput">Verification link from your email</label><input id="verifyLinkInput" type="text" required autocomplete="off" spellcheck="false" placeholder="Paste the full verification link"><button class="secondary" style="margin-top:12px" type="submit">Verify my email</button></form>';
+el('verifyEmail').closest('.row').after(verifyHelp);
+el('verifyLinkForm').onsubmit=event=>{event.preventDefault();const value=el('verifyLinkInput').value;el('verifyLinkInput').value='';action(async()=>{if(!user)return;await user.reload();await user.getIdToken(true);if(user.emailVerified){message('Your email is already verified. Close this window and generate your website.');return;}let code;try{code=verificationLink(value,firebaseConfig.apiKey);}catch{message('Paste the full verification link from your latest PageGenie email.');return;}try{const info=await checkActionCode(auth,code);if(info.operation!=='VERIFY_EMAIL'||info.data.email?.toLowerCase()!==user.email?.toLowerCase()){message('This verification link belongs to a different account or action. Use the link for the email you signed in with.');return;}await applyActionCode(auth,code);await user.reload();await user.getIdToken(true);verifyHelp.open=false;message('Your email is verified! Close this window and generate your website.');toast('Email verified. Your Genie is ready!');}catch{message('This link has expired or was already used. Choose Send verification email / check status to check your account or send a fresh link.');}});};
 el('signOut').onclick=()=>action(async()=>{await signOut(auth);message('You’re signed out. Your local draft stays on this device.');});
 function currentId(){if(!projectId){projectId=crypto.randomUUID();localStorage.setItem('pagegenie:project:'+user.uid,projectId);}return projectId;}
 function payload(){const draft=draftData();const json=JSON.stringify(draft);if(new TextEncoder().encode(json).length>650000)throw Error('image-size');return {name:el('siteName').textContent.trim().slice(0,100)||el('business').value,draft:json,updatedAt:serverTimestamp()};}
