@@ -38,3 +38,5 @@ export const uploadLogo=onCall(logoOptions,async request=>{
  const item={image,source:'upload',label:'Uploaded logo',createdAt:Date.now(),direction:''};await version.set(item);return {version:{id:version.id,...item}};
 });
 export {createCheckout,billingStatus,createBillingPortal,stripeWebhook} from './billing.js';
+export {downloadWebsite,promotionalKit,publishWebsite,websiteAnalytics,recordSiteEvent} from './paid-features.js';
+export {saveDomainSettings} from './paid-features.js';
