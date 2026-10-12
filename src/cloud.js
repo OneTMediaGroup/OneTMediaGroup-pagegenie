@@ -88,7 +88,7 @@ const legacyUpload=uploadImage;uploadImage=input=>{if(!uploadCustomImage(input))
 const legacySection=addSection;addSection=()=>{if(!addCustomSection())legacySection();};
 
 const offlineSubmit=el('intake').onsubmit;el('intake').onsubmit=event=>{if(el('generationMode').value!=='live')setComposition(null);return offlineSubmit(event);};
-try{const saved=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');if(saved){contacts.restore(saved.businessContact||{});restoreBusinessContact(contacts.get());applyLegacyContact(contacts.get());if(saved.composition){restoreLogo(saved.logoSelection);setComposition(saved.composition,{changed:()=>saveDraft()});}}}catch{toast('Your custom draft could not be restored. Your backup and saved projects are still available.');}
+// Local drafts are restored only when the visitor chooses Continue your saved draft.
 let siteId=new URLSearchParams(location.search).get('site');
 const connectionDomain=new URLSearchParams(location.search).get('domain');
 if(connectionDomain){try{siteId=(await httpsCallable(functions,'resolveDomain')({domain:connectionDomain})).data.projectId;}catch{siteId='unavailable';}}
