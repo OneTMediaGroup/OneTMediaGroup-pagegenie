@@ -34,3 +34,9 @@ test('refreshing after completion updates checklist from authoritative saved sta
  item={...item,published:true};await s.ui.open();assert.equal(progress(),'4');assert.equal(s.el('dashCards').querySelectorAll('.launch-row.complete').length,4);
  item={...item,billing:{paid:true,plan:'complete',status:'canceled'}};await s.ui.open();assert.equal(progress(),'3');
 });
+test('billing cards explain refunded and canceled access and show scheduled cancellation dates',async()=>{
+ let billing={paid:true,plan:'complete',status:'active',cancelAtPeriodEnd:true,currentPeriodEnd:1791763200};
+ const s=setup(async()=>[{id:'saved-one',name:'Billing QA',draft:'{}',billing}]);await s.ui.open();assert.match(s.el('dashCards').textContent,/Cancels/);assert.equal(s.el('dashPlans').textContent,'1');
+ billing={...billing,paid:false,status:'refunded',cancelAtPeriodEnd:false};await s.ui.open();assert.match(s.el('dashCards').textContent,/Refunded · paid features locked/);assert.equal(s.el('dashPlans').textContent,'0');
+ billing={...billing,status:'canceled'};await s.ui.open();assert.match(s.el('dashCards').textContent,/Cancelled · paid features locked/);
+});
