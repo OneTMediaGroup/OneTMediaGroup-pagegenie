@@ -28,8 +28,8 @@ Reports do not automatically trigger removal. New reports and privacy requests t
 
 ## Launch work recorded 12 October 2026
 - Private self-service account export and deletion-impact review deployed and tested live after fresh owner sign-in. Unauthenticated export returns 401. Automated suite: 117 passing checks before the additional owner-navigation regression check.
-- Daily Firestore backup schedule enabled, retention seven days, schedule ID `8176285b-401e-4342-a88c-b8d7f0b1bb71`. No backup existed immediately after creation. First successful backup and isolated restore rehearsal remain open gates; this does not cover Firebase Auth or provider configuration by itself.
-- Owner approved a 30-day recovery period for website and logo content. Actual recovery/purge workflow and billing/security retention schedule remain open.
+- Daily Firestore backup schedule enabled, retention seven days, schedule ID `8176285b-401e-4342-a88c-b8d7f0b1bb71`. Actual first managed-backup restore and deletion-safety drill passed; see BACKUP-RESTORE-REHEARSAL.md. Firebase Auth and provider configuration remain outside the Firestore snapshot.
+- Owner approved a 30-day recovery period for website and logo content. Recovery/purge is deployed and tested; billing/security retention schedule remains open.
 - Live Stripe and real registrar purchases remain disabled. No launch approval has been given.
 
 
@@ -38,3 +38,5 @@ Reports do not automatically trigger removal. New reports and privacy requests t
 The 30-day account recovery and permanent content/Auth removal workflow is implemented and has passed isolated Firebase Auth/Firestore integration tests, including real rule enforcement, preservation/recovery of nested logo data, refusal for billing/domain records and simulated-expiry destruction. Production deployment was blocked by automatic approval review because it enables irreversible removal for real accounts. The owner subsequently explicitly approved deployment and activation on 12 October 2026. Backend deployment succeeded and the hourly scheduler is enabled; release completion includes checking the index is ready and the customer controls are live. Billing/domain accounts remain held for human resolution; policy/security records and backup restore handling still require their separate reviewed process.
 
 Release verification — 12 October 2026: recovery and cleanup services ACTIVE; hourly scheduler ENABLED; accountLifecycle index READY; GitHub Pages release 126aad5 succeeded; live signed-in status control verified without scheduling deletion; anonymous recovery call returned 401; Northline HTTPS returned 200. All 127 automated tests passed. Live payments remain disabled.
+
+Consolidated launch status: LAUNCH-CHECKLIST.md. AI generation request ceilings and owner pause controls: AI-OPERATIONS.md. These do not replace the remaining bot protection and alerting work.
