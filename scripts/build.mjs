@@ -1,8 +1,10 @@
+import {homeSEO,writeSEOFiles} from './seo.mjs';
 import {build} from 'esbuild';
 import {createHash} from 'node:crypto';
 import {readFile,writeFile} from 'node:fs/promises';
 await build({entryPoints:['src/cloud.js'],bundle:true,format:'esm',minify:true,outfile:'assets/cloud.js',target:['es2022'],legalComments:'eof'});
 let html=await readFile('PageGenie.html','utf8');
+html=html.replace('<meta name="robots" content="noindex, follow">','').replace('</head>',homeSEO+'</head>');
 html=html.replace('</head>',`<script>if(new URLSearchParams(location.search).has('domain')||new URLSearchParams(location.search).has('site'))document.documentElement.dataset.publicOpening='true';</script><style>html[data-public-opening] main,html[data-public-opening] header{visibility:hidden}</style></head>`);
 const ui=await readFile('src/account.html','utf8');
 const bundleVersion=createHash('sha256').update(await readFile('assets/cloud.js')).digest('hex').slice(0,12);
@@ -18,3 +20,5 @@ await build({entryPoints:['src/auth-action.js'],bundle:true,format:'esm',minify:
 const actionVersion=createHash('sha256').update(await readFile('assets/auth-action.js')).digest('hex').slice(0,12);
 const actionPage=(await readFile('src/auth-action.html','utf8')).replace('./assets/auth-action.js',`./assets/auth-action.js?v=${actionVersion}`);
 await writeFile('auth.html',actionPage);
+
+await writeSEOFiles();

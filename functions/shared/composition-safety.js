@@ -1,3 +1,4 @@
+import {seoHead} from './seo.js';
 import {hydrateMedia,parseMedia} from './creator-media.js';
 import {businessLink} from './business-contact.js';
 import createDOMPurify from 'dompurify';
@@ -24,6 +25,6 @@ export function cleanComposition(input,win){
  return {concept:String(input.concept||'Custom website').slice(0,600),html:doc.body.innerHTML,css:responsiveCSS+(responsiveCSS.includes('/* PageGenie responsive guard */')?'':'\n'+guard)};
 }
 export function escapeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-export function exportDocument(composition,title){return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:; frame-src https://www.youtube-nocookie.com https://player.twitch.tv; base-uri \'none\'; form-action \'none\'"><title>'+escapeText(title)+'</title><style>'+composition.css+'</style></head><body>'+composition.html+'</body></html>';}
+export function exportDocument(composition,title,seo={}){return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:; frame-src https://www.youtube-nocookie.com https://player.twitch.tv; base-uri \'none\'; form-action \'none\'"><title>'+escapeText(title)+'</title>'+seoHead(composition,title,seo)+'<style>'+composition.css+'</style></head><body>'+composition.html+'</body></html>';}
 
 export function mediaComposition(composition,win,hostname=''){const doc=new win.DOMParser().parseFromString(composition.html,'text/html');hydrateMedia(doc,hostname);return {...composition,html:doc.body.innerHTML};}

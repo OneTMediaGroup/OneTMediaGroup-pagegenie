@@ -11,11 +11,11 @@ export async function hostedDocument(host,db=getFirestore()){
  const [publicDoc,billingDoc]=await Promise.all([db.doc('publishedSites/'+mapping.projectId).get(),db.doc(`users/${mapping.uid}/billing/${mapping.projectId}`).get()]);
  const site=publicDoc.data();if(!site?.hosting||site.ownerId!==mapping.uid||!entitlements(billingDoc.data()).customDomain)return null;
  const draft=JSON.parse(site.draft),win=new JSDOM('').window;
- try{return exportDocument(mediaComposition(cleanComposition(draft.composition,win),win,host),site.name);}finally{win.close();}
+ try{return exportDocument(mediaComposition(cleanComposition(draft.composition,win),win,host),site.name+(draft.fields?.location?' — '+draft.fields.location:''),{url:'https://'+host+'/'});}finally{win.close();}
 }
 export const customerWebsite=onRequest({region:'northamerica-northeast1',memory:'512MiB',maxInstances:3,timeoutSeconds:30,cors:false},async(req,res)=>{
  res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','Strict-Transport-Security':'max-age=31536000','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-src https://www.youtube-nocookie.com https://player.twitch.tv; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"});
  if(!['GET','HEAD'].includes(req.method)){res.set('Allow','GET, HEAD').status(405).send('Method not allowed');return;}
- if(req.path!=='/'&&req.path!=='/index.html'){res.status(404).send('Page not found');return;}
- try{const html=await hostedDocument(requestHostname(req.headers));if(!html){res.status(404).send('This website is unavailable or has not been published.');return;}res.type('html').status(200).send(html);}catch{res.status(503).send('This website is temporarily unavailable. Please try again shortly.');}
+ if(!['/','/index.html','/robots.txt','/sitemap.xml'].includes(req.path)){res.status(404).send('Page not found');return;}
+ try{const html=await hostedDocument(requestHostname(req.headers));if(!html){res.set('X-Robots-Tag','noindex');res.status(404).send('This website is unavailable or has not been published.');return;}const host=requestHostname(req.headers);if(req.path==='/robots.txt'){res.type('text/plain').send('User-agent: *\nAllow: /\nSitemap: https://'+host+'/sitemap.xml\n');return;}if(req.path==='/sitemap.xml'){res.type('application/xml').send('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://'+host+'/</loc></url></urlset>');return;}res.type('html').status(200).send(html);}catch{res.status(503).send('This website is temporarily unavailable. Please try again shortly.');}
 });
