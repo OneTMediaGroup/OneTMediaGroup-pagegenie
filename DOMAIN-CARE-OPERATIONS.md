@@ -8,7 +8,7 @@ From a saved website's domain step, open **Manage registration · renewal & tran
 
 Open **Domain care & recovery** in the private owner workspace to see up to 50 open requests. Verify the actual registrant, provider record, current price, customer approval, locks and registry rules before acting. Resolve requests with a customer-readable outcome. This closes the support request only: it does not execute a renewal/transfer or update registrar expiry. Never include transfer codes or credentials in an outcome. Deliver sensitive transfer information through a separately verified channel.
 
-A request queues an owner email to gotyourschase@hotmail.com. Resend retries use a stable idempotency key and stop retrying after 20 hours, with an operations alert. Provider acceptance is not proof of inbox delivery. Owner confirmed both renewal and transfer request alerts reached gotyourschase@hotmail.com in the phone test below. Expiry-reminder inbox delivery remains a separate check.
+A request queues an owner email to gotyourschase@hotmail.com. Resend retries use a stable idempotency key and stop retrying after 20 hours, with an operations alert. Provider acceptance is not proof of inbox delivery. Owner confirmed both renewal and transfer request alerts reached gotyourschase@hotmail.com in the phone test below. Owner also confirmed the seven-day fictional expiry reminder arrived with the correct date, renewal responsibility and sign-in link; see rehearsal below.
 
 ## Expiry reminders
 
@@ -35,3 +35,11 @@ Unknown, failed-paid and failed-refund writes create a private recovery request;
 - Submitted renewal help and transfer requests through the phone UI. Both persisted as open private requests, both buttons changed to Requested, and both records have notificationSentAt. Owner confirmed both alert emails arrived.
 - Dashboard Domains now opens domain care directly for registered domains; other domains retain the search/owner-details route. Ten focused dashboard/domain UI tests and the build passed.
 - Requests remain open for a later owner review rehearsal. No renewal, transfer, purchase, refund or live-payment enablement occurred.
+
+## Expiry-reminder delivery rehearsal — 12 October
+
+- Seven focused domain-care tests passed, covering all 60/30/7/1/0 boundaries, missing/invalid expiry, production/sandbox exclusions, renewal responsibility, auto-renew caveat, expired-domain recovery wording and explicit TEST labelling for fixtures.
+- Used only the existing northline-domain-care.example fictional record. Temporarily simulated a paid production registration with expiry 19 October 2026 at 23:48 UTC, then queued its deterministic seven-day notice using the same core reminder-stage and ID helpers. No real registrar record, purchase or billing status changed.
+- Deployed notifyDomainExpiry selected the verified customer email and sent the TEST notice; notificationSentAt recorded 12 October at 23:55 UTC. Owner confirmed receipt and correct content at gotyourschase@hotmail.com. The email contained the domain/date, warning that the website plan does not renew domains, no-charge support-request wording and sign-in link.
+- A second create of the same notice was rejected as already existing. Exactly one fixture notice exists. Restored the record to sandbox with its original 2027 expiry after delivery, preventing further production expiry notices for the fixture.
+- The production-wide schedule was not manually run: automatic approval review rejected its potential to email unrelated customers. Live delivery testing was deliberately scoped to one fixture; scheduler iteration/deduplication is covered by the earlier isolated Firestore rehearsal. This does not prove future cron uptime or production registrar expiry refresh. Live payments remain off.
