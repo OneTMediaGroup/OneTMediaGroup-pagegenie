@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {JSDOM} from 'jsdom';
+import {installDomainCareUI,installOwnerDomainCare} from '../src/domain-care-ui.js';
+const tick=()=>new Promise(resolve=>setImmediate(resolve));
+test('Customer requests show accurate sandbox status and disable an already queued renewal',async()=>{
+ const dom=new JSDOM('<header></header><div id="paidDomainStatus"></div>');globalThis.document=dom.window.document;dom.window.HTMLDialogElement.prototype.showModal=function(){};dom.window.HTMLDialogElement.prototype.close=function(){};
+ const user={uid:'fixture'},calls=[];let requested=false;
+ const httpsCallable=(_,name)=>async input=>{calls.push({name,input});if(input.action==='request')requested=true;return {data:{care:{domain:'northline.example',environment:'sandbox',status:'registered',autoRenew:false,canRequestRenewal:true,canRequestTransfer:true},requests:requested?[{kind:'renewal',status:'open'}]:[]}};};
+ const button=installDomainCareUI({functions:{},httpsCallable,context:()=>({user,projectId:'fixture-project'}),openAccount:()=>{throw Error('Already signed in');}});await button.onclick();let dialog=document.querySelector('dialog');assert.match(dialog.textContent,/No real domain was purchased/);assert.match(dialog.textContent,/website subscription does not renew/);assert.match(dialog.textContent,/Expiry emails are not sent/);await [...dialog.querySelectorAll('button')].find(b=>b.textContent==='Request renewal help').onclick();assert.equal(calls.at(-1).input.kind,'renewal');assert.equal([...dialog.querySelectorAll('button')].find(b=>b.textContent.includes('Requested')).disabled,true);assert.match(dialog.textContent,/saved for support review/);dialog.querySelector('[data-close]').click();assert.equal(document.querySelector('dialog'),null);dom.window.close();delete globalThis.document;
+});
+test('Private owner queue exposes a readable outcome before resolving a request',async()=>{
+ const dom=new JSDOM('<header></header>');globalThis.document=dom.window.document;dom.window.HTMLDialogElement.prototype.showModal=function(){};dom.window.HTMLDialogElement.prototype.close=function(){};
+ const calls=[];installOwnerDomainCare({functions:{},httpsCallable:()=>async input=>{calls.push(input);return {data:input.action==='list'?{requests:[{id:'fixture',uid:'fixture-owner',domain:'northline.example',kind:'transfer',environment:'sandbox'}]}:{message:'Handled'}};}});document.querySelector('[data-owner-control]').click();await tick();let dialog=document.querySelector('dialog');assert.match(dialog.textContent,/Outcome shown to the customer/);let finish=[...dialog.querySelectorAll('button')].find(b=>b.textContent==='Mark request handled');await finish.onclick();assert.equal(calls.length,1);assert.match(dialog.textContent,/at least 10/);dialog.querySelector('textarea').value='Customer informed of transfer requirements.';await finish.onclick();assert.equal(calls.at(-1).action,'resolve');assert.equal(dialog.querySelector('section'),null);dom.window.close();delete globalThis.document;
+});

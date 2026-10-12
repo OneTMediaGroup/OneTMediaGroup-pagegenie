@@ -1,3 +1,4 @@
+import {installOwnerDomainCare} from './domain-care-ui.js';
 import {initializeApp} from 'firebase/app';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'firebase/auth';
 import {getFunctions,httpsCallable} from 'firebase/functions';
@@ -24,7 +25,7 @@ onAuthStateChanged(auth,async user=>{
   if(!await security.ensure(user)||run!==epoch)return;
   // The server verifies owner permission and the protected session before any tools appear.
   await httpsCallable(functions,'reviewContent')({action:'list'});if(run!==epoch)return;
-  await installContentReview({user:auth.currentUser,functions,httpsCallable});if(run!==epoch)return;
+  await installContentReview({user:auth.currentUser,functions,httpsCallable});if(run!==epoch)return;installOwnerDomainCare({functions,httpsCallable});
   document.querySelectorAll('[data-owner-control]').forEach(n=>el('ownerTools').append(n));
   el('accountDialog').close();el('ownerStatus').textContent='Signed in as '+auth.currentUser.email;el('ownerWorkspace').hidden=false;
  }catch{if(run!==epoch)return;el('ownerStatus').textContent='We couldn’t unlock owner access. Please sign out and try again.';}

@@ -73,3 +73,5 @@ export {ownerPasskey} from "./passkeys.js";
 export {ownerEmailSignIn} from "./owner-email.js";
 
 export {saveProject} from './project-save.js';
+
+export {domainManagement,reviewDomainService,checkDomainCare,queueDomainRecovery,notifyDomainRequest,notifyDomainExpiry} from './domain-care.js';

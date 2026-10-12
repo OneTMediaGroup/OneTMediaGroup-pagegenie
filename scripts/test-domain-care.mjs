@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';import {createRequire} from 'node:module';
+if(!process.env.FIRESTORE_EMULATOR_HOST||process.env.GCLOUD_PROJECT!=='demo-pagegenie-recovery')throw Error('Isolated demo emulator required');
+const require=createRequire(new URL('../functions/index.js',import.meta.url));const {initializeApp,deleteApp}=require('firebase-admin/app'),{getFirestore}=require('firebase-admin/firestore');const app=initializeApp({projectId:'demo-pagegenie-recovery'}),db=getFirestore();
+const {queueDomainRequest,domainManagement,reviewDomainService,checkDomainCare}=await import('../functions/domain-care.js');
+const uid='domain-care-fixture',id='11111111-1111-1111-1111-111111111111',order={orderId:'care-fixture-order',environment:'sandbox',status:'registered',paymentStatus:'paid',details:{domain:'example.com'},expiresAt:new Date(Date.now()+30*86400000).toISOString(),autoRenew:false};
+await db.doc(`users/${uid}/projects/${id}`).set({name:'Isolated domain fixture'});await db.doc(`users/${uid}/domainOrders/${id}`).set(order);
+const results=await Promise.all(Array.from({length:12},()=>queueDomainRequest({db,uid,projectId:id,order,kind:'renewal'})));assert.equal(new Set(results.map(x=>x.id)).size,1);assert.equal((await db.collection(`users/${uid}/domainServiceRequests`).get()).size,1);
+const auth={uid,token:{email_verified:true}},request={auth,data:{projectId:id,action:'status'}};const status=await domainManagement.run(request);assert.equal(status.requests.length,1);assert.equal(status.care.registered,true);assert.equal(status.requests[0].uid,undefined);
+await assert.rejects(domainManagement.run({...request,auth:{uid:'another-account',token:{email_verified:true}}}),e=>e.code==='not-found');
+await assert.rejects(domainManagement.run({...request,auth:{uid,token:{email_verified:false}}}),e=>e.code==='permission-denied');
+await assert.rejects(reviewDomainService.run({...request,data:{action:'list'}}),e=>e.code==='permission-denied');
+await checkDomainCare.run({});assert.equal((await db.collection(`users/${uid}/domainNotices`).get()).size,0);
+await db.doc(`users/${uid}/domainOrders/${id}`).update({environment:'production'});await checkDomainCare.run({});await checkDomainCare.run({});assert.equal((await db.collection(`users/${uid}/domainNotices`).get()).size,1);
+await db.doc('accountLifecycle/'+uid).set({status:'recovery'});await assert.rejects(queueDomainRequest({db,uid,projectId:id,order:{...order,environment:'production'},kind:'transfer'}),e=>e.code==='failed-precondition');
+await db.terminate();await deleteApp(app);console.log('PASS: concurrent request deduplication, private customer status, cross-account/unverified/owner denial, sandbox email exclusion, production reminder deduplication and deletion hold. No provider calls or emails.');
