@@ -25,3 +25,9 @@ Reports do not automatically trigger removal. New reports and privacy requests t
 
 ## Regression verification
 103 tests pass, including all 19 curated layouts passing text and rasterised vector artwork into the final moderation gate, CSS-generated text coverage, unreadable-image rejection and fail-closed provider failures. A passed automated audit is a point-in-time check, not a guarantee of legal compliance or continuously changing external embeds.
+
+## Launch work recorded 12 October 2026
+- Private self-service account export and deletion-impact review deployed and tested live after fresh owner sign-in. Unauthenticated export returns 401. Automated suite: 117 passing checks before the additional owner-navigation regression check.
+- Daily Firestore backup schedule enabled, retention seven days, schedule ID `8176285b-401e-4342-a88c-b8d7f0b1bb71`. No backup existed immediately after creation. First successful backup and isolated restore rehearsal remain open gates; this does not cover Firebase Auth or provider configuration by itself.
+- Owner approved a 30-day recovery period for website and logo content. Actual recovery/purge workflow and billing/security retention schedule remain open.
+- Live Stripe and real registrar purchases remain disabled. No launch approval has been given.

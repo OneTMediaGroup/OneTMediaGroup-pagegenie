@@ -29,3 +29,7 @@ Set formal retention periods and expiry/deletion jobs; validate private export d
 The Account screen offers a private JSON download of the signed-in user's account profile, policy acceptance and recursively paginated private user collections. Both callable endpoints require verified email and authentication within the last ten minutes. Export files are assembled locally, not placed at a public download URL. This does not replace a reviewed access request covering support correspondence, restricted security records, third-party-held records or any other applicable records.
 
 The deletion-impact review counts saved/published websites, billing records, domain orders and domain connections. It deletes nothing and does not cancel subscriptions. Actual deletion remains a launch blocker until a reviewed retention schedule, billing/domain handoff and tested deletion procedure are complete.
+
+## Owner retention decision — 12 October 2026
+
+The owner approved a 30-day recovery period for website and logo content before permanent removal. This is a product decision, not a claim that all statutory retention requirements have been resolved. Billing and security records need a documented purpose and separate retention schedule. Implementation and a disposable-account recovery/purge test remain required before launch.
