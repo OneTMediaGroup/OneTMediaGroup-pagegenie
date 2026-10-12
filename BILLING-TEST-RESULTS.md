@@ -27,7 +27,7 @@ Billing portal return includes the selected project, refreshes its status and op
 
 Refunding does not itself cancel future subscription invoices in Stripe. An owner issuing a full refund to end service must also cancel the subscription; both actions were tested separately. Customer portal cancellation is configured for period end. Refund amounts/eligibility remain an owner decision under the published policy, not an automatic refund promise.
 
-Live keys and live webhook configuration remain disabled. Before enabling them, repeat a controlled live-mode verification, finish tax/refund operations and recognizable PageGenie billing descriptors. The shared Stripe account currently shows a FLOOR FLOW statement descriptor in sandbox; do not change the shared account globally without reviewing its other products. Backup restore and other launch gates remain open.
+Live keys and live webhook configuration remain disabled. Before enabling them, repeat a controlled live-mode verification, finish tax/refund operations and recognizable PageGenie billing descriptors. The shared Stripe account currently shows a FLOOR FLOW statement descriptor in sandbox; do not change the shared account globally without reviewing its other products. The actual managed-backup restore and deletion-safety drill have now passed; see BACKUP-RESTORE-REHEARSAL.md. Other launch gates remain open.
 
 All 136 automated tests passed; the frontend build and whitespace checks passed.
 
