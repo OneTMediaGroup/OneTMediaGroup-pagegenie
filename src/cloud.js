@@ -156,7 +156,7 @@ async function syncFeatureAccess(){displayFeatureAccess();if(el('paidDomainName'
 
 if(!siteId)installDomainRegistration({db,functions,context:()=>({user,projectId}),ensureProject:async()=>{if(!user)throw Error('Sign in first.');const id=currentId();await setDoc(doc(db,'users',user.uid,'projects',id),payload());return id;},openAccount:()=>openAccount()});
 
-installCreatorUI({get:getComposition,set:value=>setComposition(value,{changed:()=>saveDraft()}),save:()=>saveDraft(),notify:toast});
+if(!siteId)installCreatorUI({get:getComposition,set:value=>setComposition(value,{changed:()=>saveDraft()}),save:()=>saveDraft(),notify:toast});
 
 import {installTrustUI,installContentReview} from './trust-ui.js';
 installTrustUI({functions,httpsCallable});
