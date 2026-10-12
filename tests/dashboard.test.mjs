@@ -25,3 +25,12 @@ test('launch checklist uses saved contact and paid registration state, with opti
  const list=s.el('dashCards').querySelector('.launch-checklist');assert.equal(list.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'),'2');assert.match(list.textContent,/optional for a free preview/);assert.equal(list.querySelectorAll('.complete').length,2);
  for(const b of list.querySelectorAll('button'))b.click();assert.deepEqual(s.actions,[['saved-one','details'],['saved-one','billing'],['saved-one','domains'],['saved-one','edit']]);
 });
+test('refreshing after completion updates checklist from authoritative saved state',async()=>{
+ let item={id:'saved-one',name:'Northline',draft:'{}',published:false,billing:{paid:false},domain:{status:'pending'}};
+ const s=setup(async()=>[item]);await s.ui.open();const progress=()=>s.el('dashCards').querySelector('[role="progressbar"]').getAttribute('aria-valuenow');assert.equal(progress(),'0');
+ item={...item,draft:JSON.stringify({businessContact:{contactEmail:'northline-demo@example.com'}})};await s.ui.open();assert.equal(progress(),'1');
+ item={...item,billing:{paid:true,plan:'complete',status:'active'}};await s.ui.open();assert.equal(progress(),'2');
+ item={...item,domain:{status:'registered',details:{domain:'northline.ca'}}};await s.ui.open();assert.equal(progress(),'3');
+ item={...item,published:true};await s.ui.open();assert.equal(progress(),'4');assert.equal(s.el('dashCards').querySelectorAll('.launch-row.complete').length,4);
+ item={...item,billing:{paid:true,plan:'complete',status:'canceled'}};await s.ui.open();assert.equal(progress(),'3');
+});
