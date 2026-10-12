@@ -25,7 +25,7 @@ else try {
       event.preventDefault();
       if(el('password').value!==el('confirmPassword').value){el('message').textContent='Those passwords don’t match. Please try again.';return;}
       const button=el('resetForm').querySelector('button');button.disabled=true;
-      try{await confirmPasswordReset(auth,code,el('password').value);el('resetForm').reset();el('resetForm').classList.add('hidden');show('Password updated','Return to PageGenie and sign in with your new password.');}
+      try{await confirmPasswordReset(auth,code,el('password').value);el('resetForm').reset();el('resetForm').classList.add('hidden');show('Password updated','Taking you back to PageGenie to sign in…');el('returnLink').href='./?signin=1';setTimeout(()=>location.replace('./?signin=1'),1200);}
       catch(error){el('message').textContent=error.code==='auth/weak-password'?'Choose a stronger password and try again.':'This reset link is no longer valid. Request a fresh password-reset email from PageGenie.';}
       finally{button.disabled=false;}
     };
