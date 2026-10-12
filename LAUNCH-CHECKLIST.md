@@ -61,3 +61,9 @@ No soft launch or public paid launch is approved. Passing these tests does not r
 - Removed fabricated visitor statistics and the placeholder QR image from the delivered customer document. Analytics use actual server counts or a plan/empty state; QR appears after successful publication.
 - Publication and plan messages use customer language. Domain receipts still explain when no real domain was purchased; production domain purchasing remains unavailable and must not be implied by cosmetic changes.
 - Build and 173 tests passed. Billing configuration remains testMode true; no live keys, prices, webhooks or registrar purchase routes were enabled.
+
+## Domain search and .ca intake — 12 October
+- Domain step starts with an empty, prominent search. Results show availability, CAD first-year total, separate $2 fee and renewal estimate before owner details. Only confirmed available/priced results enable selection; failures offer retry and unsupported .ca checks never imply the name is taken.
+- .ca owner intake requires an explicit Canadian Presence category and current CIRA agreement consent, validated server-side, saved privately with a server timestamp. Confirmation includes the expected CIRA email heads-up. This records a declaration, not independent eligibility verification.
+- Cloudflare sandbox .ca support remains unavailable. Production .ca registration schema/orchestration still requires verification; no purchase support was enabled by this work.
+- 179 local tests pass, including late search responses, invalid quotes, unavailable domains and .ca consent. Phone search layout checked. Live payments remain off.

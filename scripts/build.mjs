@@ -21,7 +21,7 @@ html=html.replace('No signup. No credit card. Just a little magic.','Create a fr
 const customer=new JSDOM(html),page=customer.window.document;
 page.querySelector('#domainSearch').value='';
 page.querySelector('#domainSearch').removeAttribute('value');
-page.querySelector('#domainSearch').placeholder='Your preferred website name';
+page.querySelector('#domainSearch').placeholder='Your business name or domain';
 const analytics=page.querySelector('#screen4 .bars').closest('.card');
 analytics.id='paidAnalytics';analytics.textContent='Your website statistics will appear here after publishing with Starter or Complete.';
 const qr=page.querySelector('#qrImage');qr.removeAttribute('src');qr.hidden=true;qr.alt='QR code for your published website';
