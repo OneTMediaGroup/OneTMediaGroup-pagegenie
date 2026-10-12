@@ -35,9 +35,9 @@ The deletion-impact review counts saved/published websites, billing records, dom
 The owner approved a 30-day recovery period for website and logo content before permanent removal. This is a product decision, not a claim that all statutory retention requirements have been resolved. Billing and security records need a documented purpose and separate retention schedule. Implementation and a disposable-account recovery/purge test remain required before launch.
 
 
-## Built recovery workflow — activation pending
+## Recovery workflow — activated 12 October 2026
 
-Implementation: `functions/account-lifecycle.js`, `functions/active-call.js`, `src/account-recovery-ui.js` and the account lifecycle Firestore rules. This revision has been tested against isolated Firebase Auth and Firestore emulators. Production deployment is pending explicit owner approval.
+Implementation: `functions/account-lifecycle.js`, `functions/active-call.js`, `src/account-recovery-ui.js` and the account lifecycle Firestore rules. This revision has been tested against isolated Firebase Auth and Firestore emulators. The owner explicitly approved activation on 12 October 2026. Recovery functions, guards, Firestore rules and the hourly cleanup service were deployed successfully; the database index and live customer controls must be verified as part of release completion.
 
 - The verified account holder must authenticate within ten minutes and type `DELETE MY ACCOUNT`. The server chooses the UID and a fixed 30-day deadline; caller-supplied UID or time values cannot change these.
 - Administrator accounts cannot schedule deletion until responsibilities are transferred. Billing records, Stripe customer mappings, domain orders/requests/settings, registered-domain connections or hosted-domain mappings all place deletion on hold. Local `cancelled` or `disconnected` flags do not clear these obligations. There is no self-service override.
