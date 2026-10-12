@@ -47,3 +47,5 @@ export {connectDomainAfterRegistration,connectDomainAfterPlanChange,connectDomai
 export {customerWebsite} from './customer-hosting.js';
 
 export {designVersions} from './design-history.js';
+
+export {cinematicDesign} from "./cinematic.js";

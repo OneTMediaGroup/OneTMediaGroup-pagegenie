@@ -109,7 +109,7 @@ const designHistory=installDesignVersions({
    return result;
   }finally{generatingCustom=false;}
  },
- saveProject:async()=>{if(user)await setDoc(doc(db,'users',user.uid,'projects',currentId()),payload());},saveLocal:()=>saveDraft(),openAccount:()=>openAccount(),notify:toast,layoutSelect
+ saveProject:async()=>{if(user)await setDoc(doc(db,'users',user.uid,'projects',currentId()),payload());},saveLocal:()=>saveDraft(),openAccount:()=>openAccount(),notify:toast,layoutSelect,cinematic:{status:async()=>{if(!user)return {paid:false,remaining:3};await user.reload();await user.getIdToken(true);const id=currentId();await setDoc(doc(db,'users',user.uid,'projects',id),payload());return (await httpsCallable(functions,'cinematicDesign')({projectId:id,action:'status'})).data;},generate:async(direction,requestId)=>(await httpsCallable(functions,'cinematicDesign',{timeout:240000})({projectId,action:'generate',direction,requestId})).data,upgrade:()=>go(3)}
 });
 window.refreshDesignVersions=()=>designHistory.refresh();
 askAI=()=>designHistory.run('refine',el('aiRequest').value.trim()||'Tighten the wording while keeping the current design and business details.');
