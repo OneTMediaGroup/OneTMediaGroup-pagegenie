@@ -35,7 +35,7 @@ QA evidence: `../pagegenie-stripe-refund-proof.png`. Dedicated QA subscriptions 
 
 ## Payment failure and dispute safeguards — 12 October 2026
 
-- Failed-renewal states (`past_due`, `unpaid`, `incomplete`, `paused`) keep paid features locked; a valid active subscription can recover access. Automated state tests passed; a new Stripe-clock failed-renewal rehearsal remains to run.
+- Failed-renewal states (`past_due`, `unpaid`, `incomplete`, `paused`) keep paid features locked; a valid active subscription can recover access. Automated state tests passed. A real Stripe test clock then advanced a dedicated Starter subscription into renewal with the attachable decline test method: renewal became past_due, access locked, paying that invoice with the working test method restored access, and the QA subscription was cancelled. This exercised real Stripe state through the billing-state layer; deployed webhook delivery is a separate remaining check.
 - Dispute events resolve the original charge to its PageGenie website. Stored dispute IDs are reconciled against current Stripe state on paid-feature checks, including historical invoice disputes. Open/lost disputes lock access; won/closed inquiries allow the ordinary subscription/refund checks to decide. A won dispute cannot revive a cancelled subscription.
 - Dedicated real Stripe **test-mode** subscription: simulated dispute created, production billing-state code locked access, winning test evidence restored eligible access, duplicate event recording remained idempotent, and the QA subscription was cancelled. This exercised Stripe objects and the billing-state functions with an isolated in-memory record; it was not a deployed-webhook delivery rehearsal.
 - Existing PageGenie test webhook subscribed to dispute create/update/close/funds events. Owner gets the existing operations alert for dispute review; evidence decisions remain manual in Stripe.
@@ -45,3 +45,5 @@ QA evidence: `../pagegenie-stripe-refund-proof.png`. Dedicated QA subscriptions 
 - 162 automated tests passed and frontend build passed. No live charges or domain purchases made.
 
 References: https://docs.stripe.com/billing/subscriptions/webhooks, https://docs.stripe.com/testing#disputes, https://docs.stripe.com/api/refunds/object.
+
+Deployment confirmed: all 13 affected PageGenie functions updated successfully on 12 October; frontend published in commit 2d20bb5. Live payment configuration still testMode=true.
