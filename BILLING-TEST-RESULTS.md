@@ -32,3 +32,16 @@ Live keys and live webhook configuration remain disabled. Before enabling them, 
 All 136 automated tests passed; the frontend build and whitespace checks passed.
 
 QA evidence: `../pagegenie-stripe-refund-proof.png`. Dedicated QA subscriptions were canceled; refunds are recorded in Stripe test history. Test fixtures are private drafts and remain identifiable by Billing QA names. No API keys or account tokens are stored in this repository.
+
+## Payment failure and dispute safeguards — 12 October 2026
+
+- Failed-renewal states (`past_due`, `unpaid`, `incomplete`, `paused`) keep paid features locked; a valid active subscription can recover access. Automated state tests passed; a new Stripe-clock failed-renewal rehearsal remains to run.
+- Dispute events resolve the original charge to its PageGenie website. Stored dispute IDs are reconciled against current Stripe state on paid-feature checks, including historical invoice disputes. Open/lost disputes lock access; won/closed inquiries allow the ordinary subscription/refund checks to decide. A won dispute cannot revive a cancelled subscription.
+- Dedicated real Stripe **test-mode** subscription: simulated dispute created, production billing-state code locked access, winning test evidence restored eligible access, duplicate event recording remained idempotent, and the QA subscription was cancelled. This exercised Stripe objects and the billing-state functions with an isolated in-memory record; it was not a deployed-webhook delivery rehearsal.
+- Existing PageGenie test webhook subscribed to dispute create/update/close/funds events. Owner gets the existing operations alert for dispute review; evidence decisions remain manual in Stripe.
+- Domain refunds apply to confirmed failed registration or pre-registration availability/price failure. Registered/uncertain/submitting orders are refused by the failed-registration refund helper. Pending refunds stay pending until Stripe returns succeeded; failed/cancelled refunds stop for review and do not restart registration. Fixed-order Stripe idempotency key prevents duplicate refund creation.
+- Registration status does not probe an in-progress submission, avoiding a race with the initial registrar call. Unknown outcomes remain held for registrar status confirmation. A domain already registered is not automatically surrendered or refunded.
+- Customer dashboard now distinguishes payment problems/disputes from a free plan. Domain receipt explains pending refunds, failed refunds and uncertain registration.
+- 162 automated tests passed and frontend build passed. No live charges or domain purchases made.
+
+References: https://docs.stripe.com/billing/subscriptions/webhooks, https://docs.stripe.com/testing#disputes, https://docs.stripe.com/api/refunds/object.

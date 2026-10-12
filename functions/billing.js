@@ -2,7 +2,7 @@ import {queueOperationAlert} from './operations-alerts.js';
 import {onCall} from './active-call.js';
 import {POLICY_VERSION} from './moderation.js';
 import Stripe from 'stripe';
-import {syncBillingState,billingEventTarget} from './billing-state.js';
+import {syncBillingState,billingEventTarget,recordBillingDispute} from './billing-state.js';
 import {onRequest,HttpsError} from 'firebase-functions/v2/https';
 import {defineSecret} from 'firebase-functions/params';
 import {getFirestore} from 'firebase-admin/firestore';
@@ -24,10 +24,10 @@ export const createBillingPortal=onCall(billingOptions,async r=>{const {ref,id}=
 export const stripeWebhook=onRequest({...billingOptions,secrets:[key,hook,defineSecret('CLOUDFLARE_SANDBOX_TOKEN')],timeoutSeconds:120,cors:false},async(req,res)=>{let event;try{event=stripe().webhooks.constructEvent(req.rawBody,req.headers['stripe-signature'],hook.value());}catch{res.status(400).send('Invalid signature');return;}if(event.livemode){res.status(400).send('Test events only');return;}try{const db=getFirestore(),object=event.data.object;
  if(object.metadata?.app==='pagegenie'&&object.metadata.kind==='domain'){const {uid,projectId}=object.metadata;if(uid&&projectId&&['checkout.session.completed','checkout.session.async_payment_succeeded'].includes(event.type)&&object.payment_status==='paid'){const {processDomainPayment}=await import('./domain-payments.js');await processDomainPayment(object.id,uid,projectId);}res.sendStatus(200);return;}
  const supported=['checkout.session.completed','checkout.session.async_payment_succeeded','checkout.session.expired','charge.refunded','refund.updated','refund.created','invoice.paid','invoice.payment_failed'];
- if(!supported.includes(event.type)&&!event.type.startsWith('customer.subscription.')){res.sendStatus(200);return;}
+ if(!supported.includes(event.type)&&!event.type.startsWith('customer.subscription.')&&!event.type.startsWith('charge.dispute.')){res.sendStatus(200);return;}
  const target=await billingEventTarget(stripe(),event);if(!target?.uid||!target?.projectId){res.sendStatus(200);return;}
  const ref=db.doc(`users/${target.uid}/billing/${target.projectId}`),state=(await ref.get()).data();if(!state){res.sendStatus(200);return;}
  if(event.type.startsWith('checkout.')&&state.sessionId!==object.id){res.sendStatus(200);return;}
  if(event.type.startsWith('customer.subscription.')&&state.subscriptionId!==object.id){res.sendStatus(200);return;}
- await syncBillingState(stripe(),ref);res.sendStatus(200);
+ if(event.type.startsWith('charge.dispute.')){await recordBillingDispute(stripe(),ref,object.id);await queueOperationAlert({category:'service-failure',service:'stripe-dispute-review'});}else await syncBillingState(stripe(),ref);res.sendStatus(200);
  }catch{try{await queueOperationAlert({category:'service-failure',service:'stripe-webhook'});}catch{console.error('Stripe failure alert could not be queued');}res.sendStatus(500);}});

@@ -1,5 +1,11 @@
 # Owner security and independent monitoring
 
+## Current flow — supersedes the historical TOTP/passkey notes below
+
+Owner email/password sign-in now completes in one dialog with a six-digit email code for unrecognised browsers. Optional 30-day browser trust; server owner session expires after 12 hours. Password reset invalidates trust/session records through the Firebase token-valid-after time. Review/content/accounts/AI endpoints enforce that session. Old passkey callable is retired. Owner confirmed successful code-to-dashboard return after the same-account session handoff fix. Live payments remain off.
+
+## Historical implementation notes
+
 2026-10-12: UptimeRobot free-monitor activation requested for https://pagegenie.ca/ and https://northline.pagegenie.ca/ using gotyourschase@hotmail.com. Owner confirmed both activated. No paid plan requested. Five-minute external checks supplement Firebase alerts; an actual external down/recovery delivery drill has not yet been performed.
 
 Firebase Identity Platform TOTP provider enabled with adjacentIntervals 1. Frontend enrollment/sign-in support published in bcb52ac. Owner must enroll personally through Account > Owner security and complete a fresh sign-in with the authenticator. No seeds or OTPs are stored in project files or sent to external QR services.
