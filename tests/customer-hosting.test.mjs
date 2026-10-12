@@ -10,3 +10,5 @@ test('Custom-domain delivery continues during scheduled cancellation and stops a
  const f=fixture(),billing=f.records.get('users/owner/billing/northline');billing.cancelAtPeriodEnd=true;assert.match(await hostedDocument('northline.pagegenie.ca',f.db),/Northline/);
  for(const status of ['canceled','refunded']){billing.status=status;billing.paid=false;assert.equal(await hostedDocument('northline.pagegenie.ca',f.db),null);assert.equal(f.records.has('publishedSites/northline'),true);}
 });
+
+test('Operator test domains stay out of search while ordinary custom domains stay indexable',async()=>{const f=fixture();assert.match(await hostedDocument('northline.pagegenie.ca',f.db),/content="index, follow"/);f.records.get('hostedDomains/northline.pagegenie.ca').seoNoIndex=true;assert.match(await hostedDocument('northline.pagegenie.ca',f.db),/content="noindex, follow"/);});

@@ -34,4 +34,10 @@ Sources: [Cloudflare Registrar API](https://developers.cloudflare.com/registrar/
 
 ## Rehearsal status
 
-Registration and domain-specific owner verification passed. Firebase resource is awaiting DNS; DNS key is prepared with Zone Read and DNS Write for pagegenie-domain-test.com only, but creation is awaiting the owner's explicit approval. No DNS mutation or HTTPS completion is claimed yet. All 168 automated tests and frontend build passed; focused provisioning tests also passed after the DNS conflict refinement.
+Registration and domain-specific owner verification passed. Owner approved and created the 90-day DNS key restricted to pagegenie-domain-test.com (Zone Read, DNS Write), stored as CLOUDFLARE_TEST_DOMAIN_DNS_TOKEN in Firebase Secret Manager. Temporary plaintext copy removed after storage.
+
+Applied only three new records with the provisioning adapter, no conflicts/deletions/overwrites: apex A 199.36.158.100 (DNS only), Firebase hosting ownership TXT, and the requested ACME TXT. Both 1.1.1.1 and 8.8.8.8 resolve the A record and expected TXT values. New alias maps to the existing published Northline demo; original domain mapping and billing remain unchanged.
+
+Deployed customerWebsite adds support for operator-marked seoNoIndex aliases: robots meta + X-Robots-Tag, no advertised sitemap and an empty sitemap. Ordinary customer sites remain indexable. Direct HTTPS function request with the test hostname returns 200, Northline title, logo, tel/mailto links and noindex. This proves backend routing, not the new domain's certificate.
+
+Last direct domain check at 19:26 UTC: certificate hostname mismatch, Firebase CERT_VALIDATING, no reported certificate issue. HTTPS completion and the browser walkthrough remain pending; do not call this domain launch-ready until normal validated HTTPS succeeds. All 169 tests passed; customerWebsite deployment succeeded. Live payments and customer production purchases remain disabled.
