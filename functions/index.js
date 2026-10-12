@@ -56,3 +56,5 @@ export {sendAccountEmail} from './account-email.js';
 export {acceptPolicies,reportSite,reviewContent,listCustomerAccounts} from './trust.js';
 export {requestPrivacy,reviewPrivacy} from './privacy-requests.js';
 export {notifyContentReport,notifyPrivacyRequest,notifySiteDecision} from './trust-alerts.js';
+
+export {privacyExport,privacyDeletionPreflight} from './privacy-fulfilment.js';

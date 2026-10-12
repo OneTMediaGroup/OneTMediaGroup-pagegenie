@@ -23,3 +23,9 @@ Treat a suspected privacy breach separately from a deletion request. Restrict ex
 
 ## Launch items still open
 Set formal retention periods and expiry/deletion jobs; validate private export delivery and deletion across providers/backups; confirm legal identity and response deadlines with counsel. Live payments remain disabled until the separate launch gates are closed.
+
+## Authenticated self-service export and deletion impact
+
+The Account screen offers a private JSON download of the signed-in user's account profile, policy acceptance and recursively paginated private user collections. Both callable endpoints require verified email and authentication within the last ten minutes. Export files are assembled locally, not placed at a public download URL. This does not replace a reviewed access request covering support correspondence, restricted security records, third-party-held records or any other applicable records.
+
+The deletion-impact review counts saved/published websites, billing records, domain orders and domain connections. It deletes nothing and does not cancel subscriptions. Actual deletion remains a launch blocker until a reviewed retention schedule, billing/domain handoff and tested deletion procedure are complete.
