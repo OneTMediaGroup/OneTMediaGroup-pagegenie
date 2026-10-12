@@ -27,9 +27,17 @@ Updated 12 October 2026. Live payments and real registrar purchases remain disab
 - Private, deduplicated owner email alerts, backend-error/automated-traffic checks, HTTPS probes, AI usage warning and stale-backup check. Owner confirmed the actual test email arrived. Monitor located the READY production backup.
 - 145 tests passed plus both Firestore concurrency/AI regression drills. Live payments remain off.
 
+## Account isolation and owner sign-in review — 12 October
+
+- Owner uses one email/password sign-in with an inline email code on an unrecognised browser; optional browser trust lasts 30 days. Owner confirmed successful dashboard return. Owner review/privacy/account-list/AI controls require the verified server session; old passkey endpoint retired.
+- Owner confirmed both free UptimeRobot monitors activated (PageGenie and Northline). A real independent outage-notification drill is still separate from activation.
+- Isolated Auth/Firestore drill: 146 assertions passed covering private customer documents, forged paid records, private security records, publication bypass, recovery state, scoped billing/design access and owner gate rejection. No production customers or provider calls. Reproduce with `npm run test:isolation` using Java 21 and Firebase CLI.
+- Found and fixed statistics lookup trusting a private project ID without checking the public owner. The analytics callable now requires the published site to belong to the caller; a duplicate private project ID or absent publication grants no statistics access. Two focused regressions passed.
+- Full local suite: 157 tests passed. These tests validate the checked cases; they are not a blanket certification of all abuse paths.
+
 ## Still required, in priority order
 
-1. **Final security/operations review.** Browser App Check, request throttles and automatic alerts are implemented and tested; see BOT-PROTECTION-AND-ALERTS.md. Confirm owner MFA, review direct Auth/Firestore abuse exposure, and arrange an independent outage watchdog for failure of Firebase or the mail provider itself. Complete the final adversarial/multi-account acceptance pass.
+1. **Final security/operations review.** Browser App Check, request throttles and automatic alerts are implemented and tested; see BOT-PROTECTION-AND-ALERTS.md. Owner email protection and free external monitors are configured; the isolated multi-account pass above is complete. Review direct Auth/Firestore volume-abuse exposure (access rules alone do not cap allowed writes), perform an independent monitor notification drill, and complete content-safety/accessibility adversarial acceptance.
 2. **Commercial and legal finalisation.** Confirm the actual legal operator/contact details, countries served, applicable tax registration/setup with qualified advice, final checkout/renewal disclosures, refund handling and policy review. Set documented retention for billing, audit/security records, support correspondence and third-party systems; content deletion alone does not resolve these.
 3. **Complete billing failure/dispute operations.** Test failed renewals, chargebacks/disputes and resolution, plus domain registration failure after payment/refund and reconciliation. Prevent double fulfilment; preserve records and customer access only as intended. Domain renewals, transfer and expiry need a clear owner/customer process.
 4. **Production domain fulfilment.** Confirm registrar production access, reseller/registrant eligibility and customer ownership; test actual purchase-to-DNS-to-HTTPS provisioning and failure recovery. A working PageGenie subdomain and registrar sandbox do not prove real registration fulfilment.
