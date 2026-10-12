@@ -8,7 +8,7 @@ From a saved website's domain step, open **Manage registration · renewal & tran
 
 Open **Domain care & recovery** in the private owner workspace to see up to 50 open requests. Verify the actual registrant, provider record, current price, customer approval, locks and registry rules before acting. Resolve requests with a customer-readable outcome. This closes the support request only: it does not execute a renewal/transfer or update registrar expiry. Never include transfer codes or credentials in an outcome. Deliver sensitive transfer information through a separately verified channel.
 
-A request queues an owner email to gotyourschase@hotmail.com. Resend retries use a stable idempotency key and stop retrying after 20 hours, with an operations alert. Provider acceptance is not proof of inbox delivery. Actual new domain-care email delivery has not yet been confirmed by the owner.
+A request queues an owner email to gotyourschase@hotmail.com. Resend retries use a stable idempotency key and stop retrying after 20 hours, with an operations alert. Provider acceptance is not proof of inbox delivery. Owner confirmed both renewal and transfer request alerts reached gotyourschase@hotmail.com in the phone test below. Expiry-reminder inbox delivery remains a separate check.
 
 ## Expiry reminders
 
@@ -27,3 +27,11 @@ Unknown, failed-paid and failed-refund writes create a private recovery request;
 - Local automated suite: 190 tests, including expiry stages, deduplication, production/sandbox isolation, exact registrar/refund evidence, lost refund responses, request UI and owner UI.
 - Isolated Firestore emulator: concurrent request deduplication, own-account read, cross-account/unverified/non-owner denial, sandbox reminder exclusion, production notice deduplication and deletion hold.
 - No real renewal, transfer, refund or domain purchase was performed for this release. Existing production fulfilment and live billing safeguards remain in place.
+
+## Live phone request rehearsal — 12 October
+
+- Chrome at 390 × 844, actual deployed page and protected domainManagement callable. Current signed-in customer test account: gotyourschase@hotmail.com.
+- Used a separate, labelled **Northline · domain care test** draft and northline-domain-care.example sandbox fixture. Its paid-registration fields simulate an eligible order only; no Stripe transaction or registrar action exists for this fixture. The original Northline registration was not changed.
+- Submitted renewal help and transfer requests through the phone UI. Both persisted as open private requests, both buttons changed to Requested, and both records have notificationSentAt. Owner confirmed both alert emails arrived.
+- Dashboard Domains now opens domain care directly for registered domains; other domains retain the search/owner-details route. Ten focused dashboard/domain UI tests and the build passed.
+- Requests remain open for a later owner review rehearsal. No renewal, transfer, purchase, refund or live-payment enablement occurred.
