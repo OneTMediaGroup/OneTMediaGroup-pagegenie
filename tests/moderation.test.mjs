@@ -17,3 +17,10 @@ test('CSS-generated text is included and safety rejection propagates without a s
  await assert.rejects(checkDraft(draft,{moderator:async content=>{assert.match(content.text,/hidden text in CSS/);throw Error('Rejected by safety provider');}}),/Rejected by safety provider/);
 });
 test('Unreadable image cannot bypass the final safety gate',async()=>{let called=false;await assert.rejects(checkDraft({composition:{html:'<section><h1>Business</h1><img src="data:image/png;base64,YQ=="></section>',css:''}},{moderator:async()=>{called=true;}}),e=>e.code==='failed-precondition');assert.equal(called,false);});
+
+ test('Publication title and accessibility text cannot bypass moderation',async()=>{
+ const draft={fields:{business:'Ordinary business'},composition:{html:'<section><h1>Ordinary headline</h1><p title="Hidden title" aria-label="Accessible wording">Visible</p><img alt="Image alternative wording"></section>',css:''}};
+ let called=false;
+ await assert.rejects(checkDraft(draft,{title:'Separately edited publication title',moderator:async content=>{called=true;for(const value of ['Separately edited publication title','Hidden title','Accessible wording','Image alternative wording'])assert.ok(content.text.includes(value),value);throw Error('Rejected fixture');}}),/Rejected fixture/);
+ assert.equal(called,true);
+ });
