@@ -24,3 +24,14 @@ test('Unreadable image cannot bypass the final safety gate',async()=>{let called
  await assert.rejects(checkDraft(draft,{title:'Separately edited publication title',moderator:async content=>{called=true;for(const value of ['Separately edited publication title','Hidden title','Accessible wording','Image alternative wording'])assert.ok(content.text.includes(value),value);throw Error('Rejected fixture');}}),/Rejected fixture/);
  assert.equal(called,true);
  });
+
+test('CSS attribute-generated wording and expanded accessibility descriptions reach the final gate',async()=>{
+ const draft={composition:{html:'<section data-slogan="Attribute-only slogan"><h1>Business</h1><p aria-description="Expanded accessible wording">Welcome</p></section>',css:'section:after{content:attr(data-slogan)}'}};
+ let called=false;await assert.rejects(checkDraft(draft,{moderator:async content=>{called=true;assert.match(content.text,/Attribute-only slogan/);assert.match(content.text,/Expanded accessible wording/);throw Error('Rejected attribute fixture');}}),/Rejected attribute fixture/);assert.equal(called,true);
+});
+test('Text extraction preserves multilingual and disguised wording without decoding image bytes as text',()=>{
+ const image='data:image/png;base64,YQ==';
+ const content=draftContent({composition:{html:'<section data-message="Bonjour — مرحبا — こんにちは"><h1>h\u200bate</h1><img src="'+image+'" alt="Image description"></section>',css:''}});
+ for(const value of ['Bonjour','مرحبا','こんにちは','h\u200bate','Image description'])assert.ok(content.text.includes(value),value);
+ assert.ok(!content.text.includes(image));assert.deepEqual(content.images,[image]);
+});

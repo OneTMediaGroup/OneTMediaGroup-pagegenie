@@ -67,3 +67,7 @@ No soft launch or public paid launch is approved. Passing these tests does not r
 - .ca owner intake requires an explicit Canadian Presence category and current CIRA agreement consent, validated server-side, saved privately with a server timestamp. Confirmation includes the expected CIRA email heads-up. This records a declaration, not independent eligibility verification.
 - Cloudflare sandbox .ca support remains unavailable. Production .ca registration schema/orchestration still requires verification; no purchase support was enabled by this work.
 - 179 local tests pass, including late search responses, invalid quotes, unavailable domains and .ca consent. Phone search layout checked. Live payments remain off.
+
+## Safety acceptance follow-up — 12 October
+- Closed a moderation coverage gap for CSS-generated attribute text and expanded accessibility descriptions. Publication and HTML export now send retained non-image attribute values through the final safety check.
+- 181 local tests passed; a fresh isolated Auth/Firestore drill passed all 146 access checks. See CONTENT-SAFETY-OPERATIONS.md for scope. Live model calibration and remaining launch gates are not marked complete by these fixture checks.

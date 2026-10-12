@@ -40,3 +40,9 @@ The 30-day account recovery and permanent content/Auth removal workflow is imple
 Release verification — 12 October 2026: recovery and cleanup services ACTIVE; hourly scheduler ENABLED; accountLifecycle index READY; GitHub Pages release 126aad5 succeeded; live signed-in status control verified without scheduling deletion; anonymous recovery call returned 401; Northline HTTPS returned 200. All 127 automated tests passed. Live payments remain disabled.
 
 Consolidated launch status: LAUNCH-CHECKLIST.md. AI generation request ceilings and owner pause controls: AI-OPERATIONS.md. These do not replace the remaining bot protection and alerting work.
+
+## Attribute coverage and isolation acceptance — 12 October 2026
+- Found a final-gate coverage gap: CSS `content:attr(data-...)` could display text stored outside alt/title/aria-label. Safety extraction now includes every retained non-src attribute, so CSS attribute text and expanded accessibility descriptions reach moderation. Raster payloads continue through image checks rather than duplicated text.
+- Regression fixtures verify attribute-only wording reaches the rejecting moderator, multilingual/disguised text is preserved for review, image payload separation, unreadable-image refusal and fail-closed provider responses. These are integration-wiring fixtures, not a live model accuracy or false-positive calibration exercise.
+- Full local suite: 181 passing tests. Fresh isolated Auth/Firestore rehearsal: 146 passing access-isolation assertions; no production account data or provider calls.
+- Deploy target: publishWebsite and downloadWebsite. Existing publication is not retroactively audited by this change. Realistic multilingual/image adversarial provider acceptance, allowed-read volume and other consolidated launch gates remain open. Live payments stay off.

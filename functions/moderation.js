@@ -19,7 +19,10 @@ export function draftContent(draft){
  const win=new JSDOM(draft.composition?.html||'').window;
  try{const images=new Set([...win.document.querySelectorAll('img[src]')].map(n=>n.getAttribute('src')));function walk(value){if(typeof value==='string'&&/^data:image\/(png|jpeg|webp|gif);base64,/.test(value))images.add(value);else if(value&&typeof value==='object')Object.values(value).forEach(walk);}walk(draft);
  const svg=[...win.document.querySelectorAll('svg')].map(n=>n.outerHTML).join('');
- return {text:JSON.stringify({fields:draft.fields,contact:draft.businessContact,copy:win.document.body.textContent,labels:[...win.document.querySelectorAll('[alt],[title],[aria-label]')].map(n=>[n.getAttribute('alt'),n.getAttribute('title'),n.getAttribute('aria-label')]),vectorArtwork:svg,styles:draft.composition?.css}),images:[...images].filter(s=>/^data:image\/(png|jpeg|webp|gif);base64,/.test(s))};
+ // CSS content:attr(...) can render any retained attribute, not just alt/title.
+ // Include attribute values without duplicating raster payloads in the text input.
+ const attributes=[...win.document.querySelectorAll('*')].flatMap(node=>[...node.attributes].filter(a=>a.name!=='src').map(a=>[a.name,a.value]));
+ return {text:JSON.stringify({fields:draft.fields,contact:draft.businessContact,copy:win.document.body.textContent,attributes,vectorArtwork:svg,styles:draft.composition?.css}),images:[...images].filter(s=>/^data:image\/(png|jpeg|webp|gif);base64,/.test(s))};
  }finally{win.close();}
 }
 export async function checkDraft(draft,{title='',moderator=content=>moderateContent({key:moderationKey.value(),...content})}={}){
