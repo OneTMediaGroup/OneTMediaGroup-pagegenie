@@ -1,3 +1,4 @@
+import {POLICY_VERSION} from './moderation.js';
 import Stripe from 'stripe';
 import {connectRegisteredDomain} from './domain-connection.js';
 import {onCall,HttpsError} from 'firebase-functions/v2/https';
@@ -12,7 +13,7 @@ const accountId='73c71b31767e4449bb22322ce64c7ef8';
 function stripe(){if(!stripeKey.value().startsWith('sk_test_'))throw new HttpsError('failed-precondition','Only Stripe test payments are enabled.');return new Stripe(stripeKey.value(),{apiVersion:'2024-06-20'});}
 async function quote(order){return cloudflareQuote({accountId,token:registrarKey.value(),domain:order.details.domain,sandbox:true});}
 export const createDomainCheckout=onCall(options,async r=>{
- const {db,ref}=await registrationContext(r),s=stripe();let order;
+ const {db,ref}=await registrationContext(r),s=stripe();if((await db.doc('policyAcceptances/'+r.auth.uid).get()).data()?.version!==POLICY_VERSION)throw new HttpsError('failed-precondition','Accept the Terms and Content Policy before checkout.');let order;
  await db.runTransaction(async tx=>{order=(await tx.get(ref)).data();if(!order||order.orderId!==r.data?.orderId)throw new HttpsError('failed-precondition','Review the domain and price first.');if(order.status==='checkout'&&order.sessionId)return;if(order.status!=='review')throw new HttpsError('failed-precondition','Check the existing domain order first.');if(order.quote.expiresAt<Date.now())throw new HttpsError('failed-precondition','Price expired. Review the domain again.');tx.update(ref,{status:'checkout-opening'});});
  if(order.sessionId&&order.status==='checkout'){const prior=await s.checkout.sessions.retrieve(order.sessionId);if(prior.status==='open')return {url:prior.url};if(prior.status==='complete')throw new HttpsError('failed-precondition','Payment completed. Check registration status.');await ref.update({status:'review',sessionId:null});throw new HttpsError('failed-precondition','Checkout expired. Review the domain again.');}
  try{if(!sameDomainPrice(order.quote,await quote(order))){await ref.update({status:'price-changed'});throw new HttpsError('failed-precondition','Domain availability or registrar price changed. Review again.');}const session=await s.checkout.sessions.create(domainCheckoutParameters(order,r.auth.uid,r.auth.token.email),{idempotencyKey:'pagegenie-domain-'+order.orderId});await ref.update({sessionId:session.id,status:'checkout',checkoutExpiresAt:session.expires_at*1000});return {url:session.url};}catch(e){if((await ref.get()).data()?.status==='checkout-opening')await ref.update({status:'review'});throw e;}

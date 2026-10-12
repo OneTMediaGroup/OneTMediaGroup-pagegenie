@@ -9,9 +9,10 @@ export async function hostedDocument(host,db=getFirestore()){
  const mapping=(await db.doc('hostedDomains/'+host).get()).data();
  if(mapping?.status!=='enabled'||!mapping.uid||!mapping.projectId)return null;
  const [publicDoc,billingDoc]=await Promise.all([db.doc('publishedSites/'+mapping.projectId).get(),db.doc(`users/${mapping.uid}/billing/${mapping.projectId}`).get()]);
- const site=publicDoc.data();if(!site?.hosting||site.ownerId!==mapping.uid||!entitlements(billingDoc.data()).customDomain)return null;
+ const site=publicDoc.data();if((await db.doc('siteRestrictions/'+mapping.projectId).get()).data()?.suspended)return null;
+ if(!site?.hosting||site.ownerId!==mapping.uid||!entitlements(billingDoc.data()).customDomain)return null;
  const draft=JSON.parse(site.draft),win=new JSDOM('').window;
- try{return exportDocument(mediaComposition(cleanComposition(draft.composition,win),win,host),site.name+(draft.fields?.location?' — '+draft.fields.location:''),{url:'https://'+host+'/'});}finally{win.close();}
+ try{return exportDocument(mediaComposition(cleanComposition(draft.composition,win),win,host),site.name+(draft.fields?.location?' — '+draft.fields.location:''),{url:'https://'+host+'/'}).replace('</body>','<footer style="padding:24px;text-align:center;font:16px sans-serif"><a href="https://pagegenie.ca/policies.html#report">Report this website</a> · <a href="https://pagegenie.ca/policies.html">PageGenie policies</a></footer></body>');}finally{win.close();}
 }
 export const customerWebsite=onRequest({region:'northamerica-northeast1',memory:'512MiB',maxInstances:3,timeoutSeconds:30,cors:false},async(req,res)=>{
  res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','Strict-Transport-Security':'max-age=31536000','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-src https://www.youtube-nocookie.com https://player.twitch.tv; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"});
