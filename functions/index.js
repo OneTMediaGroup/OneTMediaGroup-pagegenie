@@ -49,3 +49,5 @@ export {customerWebsite} from './customer-hosting.js';
 export {designVersions} from './design-history.js';
 
 export {cinematicDesign} from "./cinematic.js";
+
+export {sendAccountEmail} from './account-email.js';
