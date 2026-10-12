@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+import {reconcileRestoredContent} from './restore-safety.mjs';
+if(!process.env.FIRESTORE_EMULATOR_HOST||!process.env.FIREBASE_AUTH_EMULATOR_HOST)throw Error('Emulators required.');
+const require=createRequire(new URL('../functions/index.js',import.meta.url));
+const {initializeApp,deleteApp}=require('firebase-admin/app');
+const {getFirestore}=require('firebase-admin/firestore');
+const {getAuth}=require('firebase-admin/auth');
+const app=initializeApp({projectId:'demo-pagegenie-recovery'}),source=getFirestore(app),restored=getFirestore(app,'restore-rehearsal'),auth=getAuth(app);
+await auth.createUser({uid:'survivor',email:'survivor@example.invalid'});
+for(const uid of ['survivor','deleted','recovering','orphan']){
+ await restored.doc(`users/${uid}/projects/site`).set({draft:'Saved website '+uid});
+ await restored.doc(`users/${uid}/logoProjects/site/versions/v1`).set({image:'Saved logo 1 '+uid});
+ await restored.doc(`users/${uid}/logoProjects/site/versions/v2`).set({image:'Saved logo 2 '+uid});
+ await restored.doc('publishedSites/'+uid).set({ownerId:uid,draft:'Published '+uid});
+ await restored.doc('accountLifecycle/'+uid).set({status:'active'});
+}
+await source.doc('accountLifecycle/deleted').set({status:'deleted',deletedAt:123});
+await source.doc('accountLifecycle/recovering').set({status:'recovery',deleteAfter:Date.now()+86400000});
+const before=(await restored.doc('users/survivor/projects/site').get()).data();
+const result=await reconcileRestoredContent({restored,authoritative:source,auth});
+assert.deepEqual((await restored.doc('users/survivor/projects/site').get()).data(),before);
+assert.equal((await restored.collection('users/survivor/logoProjects/site/versions').get()).size,2);
+assert.equal((await restored.doc('users/deleted/projects/site').get()).exists,false);
+assert.equal((await restored.collection('users/deleted/logoProjects/site/versions').get()).empty,true);
+assert.equal((await restored.doc('publishedSites/deleted').get()).exists,false);
+assert.equal((await restored.doc('accountLifecycle/deleted').get()).data().status,'deleted');
+await assert.rejects(auth.getUser('deleted'),e=>e.code==='auth/user-not-found');
+assert.notEqual((await restored.doc('accountLifecycle/recovering').get()).data().status,'active');
+assert.equal((await restored.doc('accountLifecycle/orphan').get()).data().status,'review-required');
+assert.deepEqual(await reconcileRestoredContent({restored,authoritative:source,auth}),{deletedAccountsRemoved:1,removedSites:0});
+await restored.doc('users/deleted/billing/old').set({status:'cancelled'});
+await assert.rejects(reconcileRestoredContent({restored,authoritative:source,auth}),/manual review/);
+console.log(JSON.stringify({passed:true,kind:'isolated old-snapshot rehearsal, not a scheduled backup restore',...result,checks:['site preserved exactly','both nested logo versions recovered','deleted site and logos removed','deletion tombstone preserved','deleted Auth user not recreated','non-active and missing identities blocked','repeat reconciliation safe','financial records stop automatic cleanup']},null,2));
+await deleteApp(app);
