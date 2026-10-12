@@ -1,8 +1,11 @@
+import {protectBrowser} from './app-attestation.js';
 import {initializeApp} from 'firebase/app';
 import {getAuth,checkActionCode,applyActionCode,verifyPasswordResetCode,confirmPasswordReset} from 'firebase/auth';
 import {firebaseConfig} from './config.js';
 import {emailActionParams,actionMode} from './email-action.js';
-const auth=getAuth(initializeApp(firebaseConfig));
+const app=initializeApp(firebaseConfig);
+protectBrowser(app);
+const auth=getAuth(app);
 const el=id=>document.getElementById(id);
 const {mode,code}=emailActionParams(location.search);
 // Keep the one-time credential out of browser history and subsequent referrers.
