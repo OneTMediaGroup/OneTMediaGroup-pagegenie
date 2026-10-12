@@ -1,3 +1,4 @@
+import {initializeAppCheck,ReCaptchaEnterpriseProvider} from 'firebase/app-check';
 import {checkoutNavigation} from './checkout-navigation.js';
 import {installDashboard} from './dashboard.js';
 import {installDesignVersions} from './design-versions.js';
@@ -19,7 +20,9 @@ import {getFunctions,httpsCallable} from 'firebase/functions';
 import QRCode from 'qrcode';
 import {firebaseConfig,features} from './config.js';
 import {verificationLink} from './email-action.js';
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),functions=getFunctions(app,'northamerica-northeast1');
+const app=initializeApp(firebaseConfig);
+initializeAppCheck(app,{provider:new ReCaptchaEnterpriseProvider('6Ld4u-ktAAAAAMvSsQq9rMYWz4GamynLE2f8oIrF'),isTokenAutoRefreshEnabled:true});
+const auth=getAuth(app),db=getFirestore(app),functions=getFunctions(app,'northamerica-northeast1');
 let user=null,projectId=null,publishedURL='',busy=false;
 let waitingForVerification=false,checkingVerification=false;let dashboard=null,editorOwner=null,editorProjectId=null;
 const el=id=>document.getElementById(id);
