@@ -47,3 +47,29 @@ QA evidence: `../pagegenie-stripe-refund-proof.png`. Dedicated QA subscriptions 
 References: https://docs.stripe.com/billing/subscriptions/webhooks, https://docs.stripe.com/testing#disputes, https://docs.stripe.com/api/refunds/object.
 
 Deployment confirmed: all 13 affected PageGenie functions updated successfully on 12 October; frontend published in commit 2d20bb5. Live payment configuration still testMode=true.
+
+## Deployed webhook delivery — 12 October 2026
+
+Passed against the registered, enabled Stripe **test-mode** webhook and deployed Firebase function. Two isolated QA billing records were seeded before the actions. After seeding, the runner only read Firestore: it did not call billingStatus, syncBillingState, or any paid-feature endpoint. All transitions below were saved automatically by the deployed webhook.
+
+- Failed renewal: Stripe test clock advanced with the declining test payment method; saved paid=false/status=past_due.
+- Successful retry: paying the failed invoice with the working test method restored saved paid=true/status=active.
+- Open dispute: a second subscription renewed with Stripe's dispute test method; the webhook recorded its dispute ID and saved paid=false/status=disputed.
+- Won dispute: submitting Stripe's winning test evidence restored saved paid=true/status=active, retaining the dispute ID for future reconciliation.
+- Both QA subscriptions were cancelled afterwards; both cancellation deliveries automatically saved paid=false/status=canceled.
+
+No manual webhook payloads or reconciliation calls were used. No customer websites or logos were altered. No live payment keys, charges or registrar purchases were used. Billing configuration remains testMode=true. This closes the deployed delivery check left open in the earlier billing-state rehearsals; domain operational and live launch gates remain separate.
+
+Test references (non-secret Stripe test objects):
+
+- renewal: subscription `sub_1UPoTP1uRlTVrdirjLQbtfg3`; clock `clock_1UPoTO1uRlTVrdiromYC55uy`.
+- dispute: subscription `sub_1UPoTv1uRlTVrdir5VduoxcA`; clock `clock_1UPoTt1uRlTVrdirINllr6SZ`; dispute `du_1UPoUC1uRlTVrdir6ecXr9Ju`.
+
+Observed completion times (UTC):
+
+- 2026-10-12T19:01:46.158Z: Failed renewal delivered and saved automatically.
+- 2026-10-12T19:01:51.319Z: Successful retry delivered and restored automatically.
+- 2026-10-12T19:01:53.808Z: QA renewal cancellation delivered automatically.
+- 2026-10-12T19:02:16.063Z: Dispute delivered and locked automatically.
+- 2026-10-12T19:02:30.971Z: Won dispute delivered and restored automatically.
+- 2026-10-12T19:02:34.273Z: QA dispute cancellation delivered automatically.
