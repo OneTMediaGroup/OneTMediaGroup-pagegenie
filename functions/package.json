@@ -1,1 +1,1 @@
-{"name":"pagegenie-functions","version":"0.1.0","private":true,"type":"module","main":"index.js","engines":{"node":"22"},"dependencies":{"dompurify":"^3.4.16","firebase-admin":"^14.5.0","firebase-functions":"^7.4.0","jsdom":"^26.1.0","sharp":"^0.35.5","stripe":"^23.0.0"}}
+{"name":"pagegenie-functions","version":"0.1.0","private":true,"type":"module","main":"index.js","engines":{"node":"22"},"dependencies":{"@simplewebauthn/server":"13.3.0","dompurify":"^3.4.16","firebase-admin":"^14.5.0","firebase-functions":"^7.4.0","jsdom":"^26.1.0","sharp":"^0.35.5","stripe":"^23.0.0"}}

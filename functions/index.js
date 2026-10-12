@@ -67,3 +67,5 @@ export {accountRecovery,purgeExpiredAccounts} from './account-lifecycle.js';
 export {aiOperations} from './ai-operations.js';
 
 export {notifyOperations,checkOperations} from './operations-alerts.js';
+
+export {ownerPasskey} from "./passkeys.js";
