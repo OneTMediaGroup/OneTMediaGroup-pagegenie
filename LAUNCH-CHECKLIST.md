@@ -20,9 +20,16 @@ Updated 12 October 2026. Live payments and real registrar purchases remain disab
 - No dollar-budget guarantee: provider pricing, token/image size, Firestore, functions, moderation and other services are separate. Counts begin with this release and do not retroactively reconstruct earlier provider usage.
 - Local suite: 142 tests passed. Firestore emulator: 20 concurrent requests admitted exactly four with ceiling four; paused website/logo callables made no OpenAI requests; resume preserved drafts. Final live release verification recorded in AI-OPERATIONS.md.
 
+## Bot protection and alerts release
+
+- Domain-restricted reCAPTCHA Enterprise/App Check browser tokens and callable enforcement; real owner browser passed the protected canary and a missing-token request was rejected.
+- Atomic 120-per-minute account throttle plus existing tighter service/AI ceilings. Isolated concurrent test passed.
+- Private, deduplicated owner email alerts, backend-error/automated-traffic checks, HTTPS probes, AI usage warning and stale-backup check. Owner confirmed the actual test email arrived. Monitor located the READY production backup.
+- 145 tests passed plus both Firestore concurrency/AI regression drills. Live payments remain off.
+
 ## Still required, in priority order
 
-1. **Bot protection and operational alerts.** Configure/test App Check without locking out real browsers, enforce it on relevant callables, verify multi-account/rate-limit bypass scenarios, and alert the owner to AI/provider failures, quota pressure, payment/webhook failures and failed backups. Confirm protected owner access/MFA and an incident-response routine.
+1. **Final security/operations review.** Browser App Check, request throttles and automatic alerts are implemented and tested; see BOT-PROTECTION-AND-ALERTS.md. Confirm owner MFA, review direct Auth/Firestore abuse exposure, and arrange an independent outage watchdog for failure of Firebase or the mail provider itself. Complete the final adversarial/multi-account acceptance pass.
 2. **Commercial and legal finalisation.** Confirm the actual legal operator/contact details, countries served, applicable tax registration/setup with qualified advice, final checkout/renewal disclosures, refund handling and policy review. Set documented retention for billing, audit/security records, support correspondence and third-party systems; content deletion alone does not resolve these.
 3. **Complete billing failure/dispute operations.** Test failed renewals, chargebacks/disputes and resolution, plus domain registration failure after payment/refund and reconciliation. Prevent double fulfilment; preserve records and customer access only as intended. Domain renewals, transfer and expiry need a clear owner/customer process.
 4. **Production domain fulfilment.** Confirm registrar production access, reseller/registrant eligibility and customer ownership; test actual purchase-to-DNS-to-HTTPS provisioning and failure recovery. A working PageGenie subdomain and registrar sandbox do not prove real registration fulfilment.

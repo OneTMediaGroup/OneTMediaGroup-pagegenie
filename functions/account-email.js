@@ -1,3 +1,4 @@
+import {observeOperation} from './operations-alerts.js';
 import {onCall,HttpsError} from 'firebase-functions/v2/https';
 import {defineSecret} from 'firebase-functions/params';
 import {getAuth} from 'firebase-admin/auth';
@@ -45,7 +46,7 @@ export async function deliverAccountEmail(request,{auth,db,send}){
  await send({...accountMessage(mode,link),to:[email]});
  return {ok:true};
 }
-export const sendAccountEmail=onCall(options,async request=>deliverAccountEmail(request,{auth:getAuth(),db:getFirestore(),send:async body=>{
+export const sendAccountEmail=onCall({...options,enforceAppCheck:true},async request=>observeOperation(r=>deliverAccountEmail(r,{auth:getAuth(),db:getFirestore(),send:async body=>{
  const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:'Bearer '+key.value(),'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(12000)});
  if(!response.ok)throw new HttpsError('unavailable','Email delivery is temporarily unavailable. Please try again shortly.');
-}}));
+}}),request));

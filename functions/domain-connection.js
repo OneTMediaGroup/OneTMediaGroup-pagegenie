@@ -38,4 +38,4 @@ export async function resolveConnectedDomain(domain,db=getFirestore()){
  const o=order.data();if(!site.data()?.hosting||site.data().ownerId!==m.uid||!entitlements(billing.data()).customDomain||o?.status!=='registered'||o.paymentStatus!=='paid'||o.orderId!==m.orderId||o.details.domain!==domain)return null;
  return {projectId:m.projectId,domain,environment:'sandbox'};
 }
-export const resolveDomain=onCall({region,maxInstances:2,cors:['https://pagegenie.ca','https://www.pagegenie.ca']},async r=>{const found=await resolveConnectedDomain(r.data?.domain);if(!found)throw new HttpsError('not-found','This domain connection is unavailable.');return found;});
+export const resolveDomain=onCall({enforceAppCheck:false,region,maxInstances:2,cors:['https://pagegenie.ca','https://www.pagegenie.ca']},async r=>{const found=await resolveConnectedDomain(r.data?.domain);if(!found)throw new HttpsError('not-found','This domain connection is unavailable.');return found;});

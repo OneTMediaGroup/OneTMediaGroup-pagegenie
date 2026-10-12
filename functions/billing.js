@@ -1,3 +1,4 @@
+import {queueOperationAlert} from './operations-alerts.js';
 import {onCall} from './active-call.js';
 import {POLICY_VERSION} from './moderation.js';
 import Stripe from 'stripe';
@@ -29,4 +30,4 @@ export const stripeWebhook=onRequest({...billingOptions,secrets:[key,hook,define
  if(event.type.startsWith('checkout.')&&state.sessionId!==object.id){res.sendStatus(200);return;}
  if(event.type.startsWith('customer.subscription.')&&state.subscriptionId!==object.id){res.sendStatus(200);return;}
  await syncBillingState(stripe(),ref);res.sendStatus(200);
- }catch{res.sendStatus(500);}});
+ }catch{try{await queueOperationAlert({category:'service-failure',service:'stripe-webhook'});}catch{console.error('Stripe failure alert could not be queued');}res.sendStatus(500);}});

@@ -8,8 +8,8 @@ export async function createPrivacyRequest(r,db){
  const id=r.auth.uid+'_'+kind,ref=db.doc('privacyRequests/'+id);
  return db.runTransaction(async tx=>{const prior=await tx.get(ref);if(prior.exists)return {id,status:prior.data().status,existing:true};tx.set(ref,{uid:r.auth.uid,email:r.auth.token.email||'',kind,status:'pending',createdAt:FieldValue.serverTimestamp()});return {id,status:'pending',existing:false};});
 }
-export const requestPrivacy=onCall(options,r=>createPrivacyRequest(r,getFirestore()));
-export const reviewPrivacy=onCall(options,async r=>{
+export const requestPrivacy=onCall({...options,enforceAppCheck:true},r=>createPrivacyRequest(r,getFirestore()));
+export const reviewPrivacy=onCall({...options,enforceAppCheck:true},async r=>{
  if(r.auth?.token.contentAdmin!==true)throw new HttpsError('permission-denied','Administrator access required.');const db=getFirestore();
  if(r.data?.action==='list'){const rows=await db.collection('privacyRequests').where('status','==','pending').limit(50).get();return {requests:rows.docs.map(d=>({id:d.id,...d.data()}))};}
  const {id,status,note}=r.data||{};if(typeof id!=='string'||!/^[a-zA-Z0-9_-]{1,150}$/.test(id)||!['fulfilled','declined'].includes(status)||typeof note!=='string'||note.trim().length<10||note.length>2000)throw new HttpsError('invalid-argument','Record the outcome and a review note.');

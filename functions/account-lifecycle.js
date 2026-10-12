@@ -69,7 +69,7 @@ export async function purgeAccount(uid,{db,auth,now=Date.now()}){
  await ref.set({status:'deleted',deletedAt:now});return {purged:true};
 }
 const options={region:'northamerica-northeast1',maxInstances:2,timeoutSeconds:120,cors:['https://pagegenie.ca','https://www.pagegenie.ca']};
-export const accountRecovery=onCall(options,async r=>{
+export const accountRecovery=onCall({...options,enforceAppCheck:true},async r=>{
  if(!r.auth||r.auth.token.email_verified!==true)throw new HttpsError('unauthenticated','Sign into your verified account first.');
  const action=r.data?.action;let owner;if(action!=='status'){verifiedPrivacyUser(r);owner=await getAuth().getUser(r.auth.uid);if(owner.disabled||!owner.emailVerified)throw new HttpsError('permission-denied','Account access requires support review.');}
  if(action==='schedule'&&owner.customClaims?.contentAdmin)throw new HttpsError('failed-precondition','Transfer administrator responsibilities before requesting account deletion. Contact support.');
