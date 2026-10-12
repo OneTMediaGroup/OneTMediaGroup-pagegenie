@@ -1,3 +1,4 @@
+const ownerAuth={getUser:async()=>({emailVerified:true,customClaims:{contentAdmin:true}})};
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 if(!process.env.FIRESTORE_EMULATOR_HOST)throw Error('AI operations test requires an isolated emulator.');
@@ -10,8 +11,9 @@ await control.set({limits:{website:{daily:4}}});
 const requests=await Promise.allSettled(Array.from({length:20},(_,i)=>reserveAiAttempt({db,uid:'race-'+i,kind:'website',now})));
 assert.equal(requests.filter(r=>r.status==='fulfilled').length,4);
 assert.equal((await db.doc('aiUsage/day-2026-10-12').get()).data().website,4);
-const owner={auth:{uid:'owner',token:{email_verified:true,contentAdmin:true}},data:{action:'pause',confirmation:'PAUSE AI CREATION'}};
-await aiOperationsAction({db,request:owner,now});
+await db.doc('ownerEmailSessions/11111111-1111-1111-1111-111111111111').set({uid:'owner',validAfter:'',expires:Date.now()+3600000});
+const owner={auth:{uid:'owner',token:{email_verified:true,contentAdmin:true,ownerEmailSession:'11111111-1111-1111-1111-111111111111'}},data:{action:'pause',confirmation:'PAUSE AI CREATION'}};
+await aiOperationsAction({auth:ownerAuth,db,request:owner,now});
 const request={auth:{uid:'dummy-ai',token:{email_verified:true}},data:{business:'Northline Test',location:'Barrie, Ontario',description:'Test contractor',services:'Renovations',tone:'Professional'}};
 await assert.rejects(generateWebsite.run(request),e=>e.code==='unavailable'&&/paused/.test(e.message));
 const id='12345678-1234-1234-1234-123456789012';await db.doc('users/dummy-ai/projects/'+id).set({draft:'{}'});
@@ -19,6 +21,6 @@ await assert.rejects(generateLogo.run({...request,data:{projectId:id,requestId:i
 assert(!(await db.doc('users/dummy-ai/logoProjects/'+id+'/versions/'+id).get()).exists);
 assert.equal((await db.doc('users/dummy-ai/logoProjects/'+id).get()).data().pending,null);
 const projectBefore=(await db.doc('users/dummy-ai/projects/'+id).get()).data();
-await aiOperationsAction({db,request:{...owner,data:{action:'resume',confirmation:'RESUME AI CREATION'}},now});
+await aiOperationsAction({auth:ownerAuth,db,request:{...owner,data:{action:'resume',confirmation:'RESUME AI CREATION'}},now});
 assert.deepEqual((await db.doc('users/dummy-ai/projects/'+id).get()).data(),projectBefore);
 console.log('PASS: concurrent ceiling, pause before website/logo provider calls, logo cleanup, resume preserves drafts. No OpenAI requests made.');

@@ -1,3 +1,4 @@
+import {requireOwnerMFA} from './owner-security.js';
 import {createHash,randomUUID} from 'node:crypto';
 import {HttpsError} from 'firebase-functions/v2/https';
 import {getFirestore} from 'firebase-admin/firestore';
@@ -34,8 +35,8 @@ export async function reserveAiAttempt({db,uid,kind,now=Date.now()}){
   tx.set(account,{[kind]:ac+1,expiresAt:new Date(now+2*86400000)},{merge:true});
  });
 }
-export async function aiOperationsAction({db,request,now=Date.now()}){
- if(request.auth?.token.contentAdmin!==true||request.auth.token.email_verified!==true)throw new HttpsError('permission-denied','Verified owner access required.');
+export async function aiOperationsAction({db,request,now=Date.now(),auth}){
+ await requireOwnerMFA(request,db,auth);
  const {action,confirmation}=request.data||{},ref=db.doc('aiControls/global');
  if(action==='pause'||action==='resume'){
   if(confirmation!==(action==='pause'?'PAUSE AI CREATION':'RESUME AI CREATION'))throw new HttpsError('invalid-argument','Confirm the AI creation change.');
