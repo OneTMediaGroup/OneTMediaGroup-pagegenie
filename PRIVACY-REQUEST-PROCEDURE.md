@@ -48,3 +48,5 @@ Implementation: `functions/account-lifecycle.js`, `functions/active-call.js`, `s
 - Daily database backups may retain removed content for up to seven additional days. Before restoring a database, preserve and reapply deletion tombstones and re-run removal of accounts already deleted; never restore deleted customer content to the public service. The separate backup restore rehearsal remains required.
 
 Validation: `npm test` and `npm run test:recovery` (requires Java 21 and Firebase CLI). The integration runner refuses to execute without both emulator environment variables, uses project `demo-pagegenie-recovery`, and advances only an injected service clock in the isolated test. No production endpoint accepts a custom deadline or clock.
+
+Release verification — 12 October 2026: recovery and cleanup services ACTIVE; hourly scheduler ENABLED; accountLifecycle index READY; GitHub Pages release 126aad5 succeeded; live signed-in status control verified without scheduling deletion; anonymous recovery call returned 401; Northline HTTPS returned 200. All 127 automated tests passed. Live payments remain disabled.
