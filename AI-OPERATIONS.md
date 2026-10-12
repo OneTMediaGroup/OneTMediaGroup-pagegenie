@@ -22,7 +22,8 @@ Before a disaster recovery promotion, preserve/reapply the latest `aiControls`, 
 
 - Unit/UI suite: 142 passing tests, including owner/verified-claim enforcement, required confirmation, failed attempts, UTC rollover, malformed controls, suspension/recovery, shared concurrent ceiling and cancel-without-mutation UI.
 - Isolated Firestore emulator: 20 concurrent transactions with shared ceiling four admitted exactly four. Paused real website/logo callable handlers rejected before any OpenAI request, cleaned pending logo reservation, and retained drafts on resume.
-- Production function and TTL status, anonymous endpoint rejection, live owner usage UI and GitHub Pages release are checked during deployment. No live OpenAI generation, customer quota exhaustion or global pause is needed for that read-only verification.
+- Live verification: all four functions ACTIVE; aiAttemptLimits and aiUsage expiry policies ACTIVE; anonymous aiOperations request returned HTTP 403; GitHub Pages release 5a6c758 succeeded. The signed-in owner opened Content review → AI creation & usage on a 390px phone viewport and received live usage/limits with AI creation running. The initial browser token-refresh connection error recovered on retry.
+- Confirmation UI was exercised with simulated local data; pause/provider blocking and resume were exercised in the Firestore emulator. Production was not paused, and no paid OpenAI generation was needed. Evidence: ../pagegenie-ai-controls-phone.png.
 
 ## Still open
 
