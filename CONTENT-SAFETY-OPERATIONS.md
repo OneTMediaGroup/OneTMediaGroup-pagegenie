@@ -10,7 +10,7 @@ Payments and domain registration remain test/sandbox. Policy version 2026-10-11.
 - Public policies: policies.html. Support and appeals: support@pagegenie.ca.
 
 ## Owner routine
-Sign in as the designated verified owner, then use Content review in the header. Review the queue daily and prioritise urgent reports. Review context and preserve decision reasons; do not trust a report alone. Contact the customer about restrictions and provide appeal instructions when appropriate. Appeals currently arrive by email and require human handling. Never download or circulate suspected child sexual abuse material; obtain appropriate specialist/legal handling and required reporting procedures. Monitor provider failures and abuse attempts in Firebase logs without adding raw sensitive content to logs.
+Sign in as the designated verified owner, then use Content review in the header. Review the queue daily and prioritise urgent reports. Review context and preserve decision reasons; do not trust a report alone. Contact the customer about restrictions and provide appeal instructions when appropriate. Appeals currently arrive by email and require human handling. Privacy requests appear in the same restricted review area; follow PRIVACY-REQUEST-PROCEDURE.md before recording an outcome. Never download or circulate suspected child sexual abuse material; obtain appropriate specialist/legal handling and required reporting procedures. Monitor provider failures and abuse attempts in Firebase logs without adding raw sensitive content to logs.
 
 ## Required before real payments
 - Canadian counsel review of Terms, Privacy, Content Policy, refunds/cancellation and checkout disclosure; verify legal business identity/contact details and jurisdictions served.
@@ -21,7 +21,7 @@ Sign in as the designated verified owner, then use Content review in the header.
 - Confirm live Stripe taxes, refund operations, subscriptions, registrar eligibility/renewals and production domain fulfilment separately. Do not change test-key protections as part of this pass.
 
 ## Limits
-Reports do not automatically trigger removal. There is no automatic email notification of every report yet; the owner must inspect Content review. We cannot revoke an HTML file already downloaded, control a copied website, or guarantee the contents of changing external streams. Suspensions prevent future PageGenie publication and hosted delivery. No AI tool replaces legal review or ongoing human moderation.
+Reports do not automatically trigger removal. New reports and privacy requests trigger an email alert to the owner inbox. Delivery failures retry for up to 20 hours; the owner must still inspect Content review regularly rather than rely on email alone. We cannot revoke an HTML file already downloaded, control a copied website, or guarantee the contents of changing external streams. Suspensions prevent future PageGenie publication and hosted delivery. No AI tool replaces legal review or ongoing human moderation.
 
 ## Regression verification
 103 tests pass, including all 19 curated layouts passing text and rasterised vector artwork into the final moderation gate, CSS-generated text coverage, unreadable-image rejection and fail-closed provider failures. A passed automated audit is a point-in-time check, not a guarantee of legal compliance or continuously changing external embeds.

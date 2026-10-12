@@ -160,3 +160,6 @@ if(!siteId)installCreatorUI({get:getComposition,set:value=>setComposition(value,
 
 import {installTrustUI,installContentReview} from './trust-ui.js';
 installTrustUI({functions,httpsCallable});
+
+import {installPrivacyUI} from './privacy-ui.js';
+if(!siteId)installPrivacyUI({functions,httpsCallable});
