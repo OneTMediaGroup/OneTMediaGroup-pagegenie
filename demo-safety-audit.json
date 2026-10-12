@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-12T03:27:40.697Z",
+  "scope": "Only the five static homepage showcase files; no customer records accessed",
+  "results": [
+    {
+      "file": "examples/northline-cinematic.html",
+      "status": "passed"
+    },
+    {
+      "file": "examples/maple-main-cafe.html",
+      "status": "passed"
+    },
+    {
+      "file": "OneTMedia-preview.html",
+      "status": "passed"
+    },
+    {
+      "file": "examples/streamer-x.html",
+      "status": "passed"
+    },
+    {
+      "file": "examples/juniper-hearth-cinematic.html",
+      "status": "passed"
+    }
+  ]
+}

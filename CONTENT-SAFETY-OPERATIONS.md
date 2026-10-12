@@ -17,8 +17,11 @@ Sign in as the designated verified owner, then use Content review in the header.
 - Decide retention periods and implement deletion/expiry jobs, access/deletion request handling and incident/breach response procedures; current expiresAt fields do not themselves guarantee deletion.
 - Verify report ownership/coverage, response targets, escalation and appeal workflow, and backups/restore procedure. Automated checks are not a guarantee and do not continuously monitor external Twitch/YouTube content.
 - Test production notifications and moderation with realistic red-team cases, evasive spellings, multilingual text, image symbols and legitimate contextual content; calibrate false positives with human review.
-- Audit pre-existing published demos (created before moderation) and ensure future example releases follow the same content review.
+- Homepage showcase audit completed 11 October 2026 (local time): cinematic Northline, Maple & Main, One T Media Group, Streamer X and cinematic Juniper & Hearth all passed live text/image/artwork moderation. See demo-safety-audit.json. Other previously published customer records were not accessed or audited; review them only within an explicitly authorised scope. Future showcase releases must repeat this audit.
 - Confirm live Stripe taxes, refund operations, subscriptions, registrar eligibility/renewals and production domain fulfilment separately. Do not change test-key protections as part of this pass.
 
 ## Limits
 Reports do not automatically trigger removal. There is no automatic email notification of every report yet; the owner must inspect Content review. We cannot revoke an HTML file already downloaded, control a copied website, or guarantee the contents of changing external streams. Suspensions prevent future PageGenie publication and hosted delivery. No AI tool replaces legal review or ongoing human moderation.
+
+## Regression verification
+103 tests pass, including all 19 curated layouts passing text and rasterised vector artwork into the final moderation gate, CSS-generated text coverage, unreadable-image rejection and fail-closed provider failures. A passed automated audit is a point-in-time check, not a guarantee of legal compliance or continuously changing external embeds.
