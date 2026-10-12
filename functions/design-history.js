@@ -1,4 +1,5 @@
-import {onCall,HttpsError} from 'firebase-functions/v2/https';
+import {onCall} from './active-call.js';
+import {HttpsError} from 'firebase-functions/v2/https';
 import {getFirestore,FieldValue} from 'firebase-admin/firestore';
 import {JSDOM} from 'jsdom';
 import {createHash} from 'node:crypto';

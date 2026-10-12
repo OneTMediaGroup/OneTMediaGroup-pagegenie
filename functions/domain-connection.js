@@ -1,5 +1,7 @@
+import {lifecycleBlocked} from './account-lifecycle.js';
+import {onCall} from './active-call.js';
 import {getFirestore} from 'firebase-admin/firestore';
-import {onCall,HttpsError} from 'firebase-functions/v2/https';
+import {HttpsError} from 'firebase-functions/v2/https';
 import {onDocumentWritten} from 'firebase-functions/v2/firestore';
 import {entitlements} from './entitlements.js';
 const region='northamerica-northeast1';
@@ -31,6 +33,7 @@ export const domainConnectionStatus=onCall({region,maxInstances:2,cors:['https:/
 export async function resolveConnectedDomain(domain,db=getFirestore()){
  if(typeof domain!=='string'||domain.length>253||! /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(domain))return null;
  const m=(await db.doc('domainConnections/'+domain).get()).data();if(m?.status!=='sandbox-connected'||m.environment!=='sandbox')return null;
+ if(lifecycleBlocked((await db.doc('accountLifecycle/'+m.uid).get()).data()))return null;
  const [site,billing,order]=await Promise.all([db.doc('publishedSites/'+m.projectId).get(),db.doc(`users/${m.uid}/billing/${m.projectId}`).get(),db.doc(`users/${m.uid}/domainOrders/${m.projectId}`).get()]);
  const o=order.data();if(!site.data()?.hosting||site.data().ownerId!==m.uid||!entitlements(billing.data()).customDomain||o?.status!=='registered'||o.paymentStatus!=='paid'||o.orderId!==m.orderId||o.details.domain!==domain)return null;
  return {projectId:m.projectId,domain,environment:'sandbox'};

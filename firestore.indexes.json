@@ -1,1 +1,30 @@
-{"indexes":[],"fieldOverrides":[{"collectionGroup":"projects","fieldPath":"draft","indexes":[]},{"collectionGroup":"publishedSites","fieldPath":"draft","indexes":[]}]}
+{
+  "indexes": [
+    {
+      "collectionGroup": "accountLifecycle",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "deleteAfter",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "projects",
+      "fieldPath": "draft",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publishedSites",
+      "fieldPath": "draft",
+      "indexes": []
+    }
+  ]
+}

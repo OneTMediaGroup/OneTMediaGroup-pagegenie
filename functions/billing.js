@@ -1,6 +1,7 @@
+import {onCall} from './active-call.js';
 import {POLICY_VERSION} from './moderation.js';
 import Stripe from 'stripe';
-import {onCall,onRequest,HttpsError} from 'firebase-functions/v2/https';
+import {onRequest,HttpsError} from 'firebase-functions/v2/https';
 import {defineSecret} from 'firebase-functions/params';
 import {getFirestore} from 'firebase-admin/firestore';
 import config from './billing-config.json' with {type:'json'};

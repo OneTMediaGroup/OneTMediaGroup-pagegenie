@@ -33,3 +33,18 @@ The deletion-impact review counts saved/published websites, billing records, dom
 ## Owner retention decision — 12 October 2026
 
 The owner approved a 30-day recovery period for website and logo content before permanent removal. This is a product decision, not a claim that all statutory retention requirements have been resolved. Billing and security records need a documented purpose and separate retention schedule. Implementation and a disposable-account recovery/purge test remain required before launch.
+
+
+## Built recovery workflow — activation pending
+
+Implementation: `functions/account-lifecycle.js`, `functions/active-call.js`, `src/account-recovery-ui.js` and the account lifecycle Firestore rules. This revision has been tested against isolated Firebase Auth and Firestore emulators. Production deployment is pending explicit owner approval.
+
+- The verified account holder must authenticate within ten minutes and type `DELETE MY ACCOUNT`. The server chooses the UID and a fixed 30-day deadline; caller-supplied UID or time values cannot change these.
+- Administrator accounts cannot schedule deletion until responsibilities are transferred. Billing records, Stripe customer mappings, domain orders/requests/settings, registered-domain connections or hosted-domain mappings all place deletion on hold. Local `cancelled` or `disconnected` flags do not clear these obligations. There is no self-service override.
+- Support must resolve subscription status, open checkout/payment/refund/dispute obligations and domain ownership/transfer/renewals separately, then document lawful retention and move any records that must be retained into an appropriately restricted reviewed record process. Do not delete a billing or domain record merely to bypass the guard. This release deliberately refuses automatic deletion of accounts with those records.
+- Eligible accounts enter `recovery`; published-site reads and hosted delivery stop, and normal server actions and client writes are blocked. Drafts/logos remain private and intact. A fresh verified sign-in can recover the account before the deadline. Restoring an account does not override content restrictions.
+- At expiry, the hourly job claims `purging` atomically against recovery, rechecks all obligations and administrator status, and stops in `review-required` if a late obligation appears. Otherwise it recursively removes private user content, owned public sites and their analytics, own dated generation counters, policy acceptance and privacy-request records, then removes Firebase Auth. Failures retain `purging` for retry and cannot reopen a partially removed account.
+- A minimal UID/status/deletion-time tombstone remains to block stale authentication tokens. Restricted content/security audit records and already delivered support correspondence are outside this automatic content purge and require the reviewed retention process. No payment, refund, subscription cancellation, domain surrender or DNS mutation occurs in the purge.
+- Daily database backups may retain removed content for up to seven additional days. Before restoring a database, preserve and reapply deletion tombstones and re-run removal of accounts already deleted; never restore deleted customer content to the public service. The separate backup restore rehearsal remains required.
+
+Validation: `npm test` and `npm run test:recovery` (requires Java 21 and Firebase CLI). The integration runner refuses to execute without both emulator environment variables, uses project `demo-pagegenie-recovery`, and advances only an injected service clock in the isolated test. No production endpoint accepts a custom deadline or clock.

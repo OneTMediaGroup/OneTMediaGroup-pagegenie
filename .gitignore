@@ -8,3 +8,7 @@ firebase-debug.log*
 
 # Local generation smoke-test artifacts (never needed by the public site)
 work/
+
+# Local emulator logs
+firestore-debug.log*
+ui-debug.log*

@@ -1,5 +1,6 @@
+import {onCall} from './active-call.js';
 import {moderateContent,moderationKey} from './moderation.js';
-import {onCall,HttpsError} from 'firebase-functions/v2/https';
+import {HttpsError} from 'firebase-functions/v2/https';
 import {defineSecret,defineString} from 'firebase-functions/params';
 import {initializeApp} from 'firebase-admin/app';
 import {getFirestore,FieldValue} from 'firebase-admin/firestore';
@@ -58,3 +59,5 @@ export {requestPrivacy,reviewPrivacy} from './privacy-requests.js';
 export {notifyContentReport,notifyPrivacyRequest,notifySiteDecision} from './trust-alerts.js';
 
 export {privacyExport,privacyDeletionPreflight} from './privacy-fulfilment.js';
+
+export {accountRecovery,purgeExpiredAccounts} from './account-lifecycle.js';

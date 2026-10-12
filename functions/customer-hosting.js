@@ -1,3 +1,4 @@
+import {lifecycleBlocked} from './account-lifecycle.js';
 import {onRequest} from 'firebase-functions/v2/https';
 import {getFirestore} from 'firebase-admin/firestore';
 import {JSDOM} from 'jsdom';
@@ -9,6 +10,7 @@ export async function hostedDocument(host,db=getFirestore()){
  const mapping=(await db.doc('hostedDomains/'+host).get()).data();
  if(mapping?.status!=='enabled'||!mapping.uid||!mapping.projectId)return null;
  const [publicDoc,billingDoc]=await Promise.all([db.doc('publishedSites/'+mapping.projectId).get(),db.doc(`users/${mapping.uid}/billing/${mapping.projectId}`).get()]);
+ if(lifecycleBlocked((await db.doc('accountLifecycle/'+mapping.uid).get()).data()))return null;
  const site=publicDoc.data();if((await db.doc('siteRestrictions/'+mapping.projectId).get()).data()?.suspended)return null;
  if(!site?.hosting||site.ownerId!==mapping.uid||!entitlements(billingDoc.data()).customDomain)return null;
  const draft=JSON.parse(site.draft),win=new JSDOM('').window;
