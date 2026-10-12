@@ -6,7 +6,7 @@ Owner email/password sign-in now completes in one dialog with a six-digit email 
 
 ## Historical implementation notes
 
-2026-10-12: UptimeRobot free-monitor activation requested for https://pagegenie.ca/ and https://northline.pagegenie.ca/ using gotyourschase@hotmail.com. Owner confirmed both activated. No paid plan requested. Five-minute external checks supplement Firebase alerts; an actual external down/recovery delivery drill has not yet been performed.
+2026-10-12: UptimeRobot free-monitor activation requested for https://pagegenie.ca/ and https://northline.pagegenie.ca/ using gotyourschase@hotmail.com. Owner confirmed both activated. No paid plan requested. Five-minute external checks supplement Firebase alerts; the independent notification delivery drill is now complete (see below).
 
 Firebase Identity Platform TOTP provider enabled with adjacentIntervals 1. Frontend enrollment/sign-in support published in bcb52ac. Owner must enroll personally through Account > Owner security and complete a fresh sign-in with the authenticator. No seeds or OTPs are stored in project files or sent to external QR services.
 
@@ -27,3 +27,9 @@ Dedicated signer pagegenie-passkey-signer@onet-pagegenie.iam.gserviceaccount.com
 Deployment is staged: ownerPasskey service and setup UI first. Owner enforcement stays UNDEPLOYED until personal enrollment and live sign-in succeed. Unit tests cover expiry/replay/recovery, wrong-origin/challenge/UV rejection with real signed WebAuthn data, and UI recovery-key acknowledgement. Physical biometric enrollment/login and real-device recovery remain pending user handoff.
 
 Manual total-loss recovery requires independently verifying the project owner through an already-secured infrastructure administrator account. Do not accept email alone or silently reset passkeys. Review owner access after recovery and re-enroll. Infrastructure MFA and external monitor outage-delivery drill remain separate outstanding checks.
+
+## Independent alert delivery — 12 October 2026
+
+Both free HTTP/S monitors are active and checking every five minutes: PageGenie monitor 804248797 and Northline monitor 804248799. Both showed UP with recent checks. Used each monitor’s Test Notification action with its attached gotyourschase email contact. The owner confirmed receipt of DOWN and UP test messages for both. No Firebase/Resend dependency, paid upgrade or site outage was introduced.
+
+This verifies the independent notification delivery route, not a deliberately induced production outage. UptimeRobot documents that its test notifications use the real delivery pipeline: https://help.uptimerobot.com/en/articles/11602913-how-to-test-notifications-in-uptimerobot-quick-guide

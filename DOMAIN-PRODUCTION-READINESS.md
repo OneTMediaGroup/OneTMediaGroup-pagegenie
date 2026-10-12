@@ -41,3 +41,7 @@ Applied only three new records with the provisioning adapter, no conflicts/delet
 Deployed customerWebsite adds support for operator-marked seoNoIndex aliases: robots meta + X-Robots-Tag, no advertised sitemap and an empty sitemap. Ordinary customer sites remain indexable. Direct HTTPS function request with the test hostname returns 200, Northline title, logo, tel/mailto links and noindex. This proves backend routing, not the new domain's certificate.
 
 Last direct domain check at 19:26 UTC: certificate hostname mismatch, Firebase CERT_VALIDATING, no reported certificate issue. HTTPS completion and the browser walkthrough remain pending; do not call this domain launch-ready until normal validated HTTPS succeeds. All 169 tests passed; customerWebsite deployment succeeded. Live payments and customer production purchases remain disabled.
+
+## HTTPS readiness update — 12 October 2026, 19:50 UTC
+
+Normal certificate validation now succeeds for pagegenie-domain-test.com: TLS 1.3, Google Trust Services certificate matching the domain, expiry 10 January 2027. Both public resolvers return 199.36.158.100. HTTPS returns 200 with Northline title, logo, email and phone; HTTP redirects 301 to HTTPS. Browser opened successfully without any bypass. Contact links point to the fictional demo email and phone, not live customer contacts. This completes the approved single-domain TLS check, not the remaining customer registrar orchestration/renewal/transfer work.

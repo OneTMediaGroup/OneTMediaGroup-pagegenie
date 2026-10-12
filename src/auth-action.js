@@ -11,7 +11,7 @@ const {mode,code}=emailActionParams(location.search);
 // Keep the one-time credential out of browser history and subsequent referrers.
 history.replaceState(null,'',location.pathname);
 function show(title,message){el('title').textContent=title;el('message').textContent=message;}
-function failure(){show('Let’s send a fresh link','This email link is incomplete, expired, or already used. Return to PageGenie, open My projects, and choose Send verification email. If you already verified, try generating your website.');}
+function failure(error){if(['auth/invalid-app-credential','auth/missing-app-credential','auth/network-request-failed'].includes(error?.code)){show('Let’s try that link again','The browser security check could not finish. Check your connection and reopen the original link from your email.');return;}show('Let’s send a fresh link','This email link is incomplete, expired, or already used. Return to PageGenie, open My projects, and choose Send verification email. If you already verified, try generating your website.');}
 if(!code){show('Open the link from your email','Use the full verification or password-reset link from your latest PageGenie email. You can request a fresh link from your account.');}
 else try {
   const info=await checkActionCode(auth,code);
@@ -29,12 +29,12 @@ else try {
       if(el('password').value!==el('confirmPassword').value){el('message').textContent='Those passwords don’t match. Please try again.';return;}
       const button=el('resetForm').querySelector('button');button.disabled=true;
       try{await confirmPasswordReset(auth,code,el('password').value);el('resetForm').reset();el('resetForm').classList.add('hidden');show('Password updated','Taking you back to PageGenie to sign in…');el('returnLink').href='./?signin=1';setTimeout(()=>location.replace('./?signin=1'),1200);}
-      catch(error){el('message').textContent=error.code==='auth/weak-password'?'Choose a stronger password and try again.':'This reset link is no longer valid. Request a fresh password-reset email from PageGenie.';}
+      catch(error){el('message').textContent=['auth/weak-password','auth/password-does-not-meet-requirements'].includes(error.code)?'Choose a stronger password and try again.':'This reset link is no longer valid. Request a fresh password-reset email from PageGenie.';}
       finally{button.disabled=false;}
     };
   }else{
     show('Restore your email address','If you did not request an email change, use the button below to restore your previous address.');
     el('recoverButton').classList.remove('hidden');
-    el('recoverButton').onclick=async()=>{el('recoverButton').disabled=true;try{await applyActionCode(auth,code);el('recoverButton').classList.add('hidden');show('Email address restored','Return to PageGenie to sign in. Consider resetting your password if you did not request the change.');}catch{failure();}};
+    el('recoverButton').onclick=async()=>{el('recoverButton').disabled=true;try{await applyActionCode(auth,code);el('recoverButton').classList.add('hidden');show('Email address restored','Return to PageGenie to sign in. Consider resetting your password if you did not request the change.');}catch(error){failure(error);}};
   }
-}catch{failure();}
+}catch(error){failure(error);}
