@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {domainName,registrantDetails,cloudflareQuote,sandboxRegistrationBody,sandboxRegistrar,sameDomainPrice} from '../functions/domain-registration.js';
-const owner={domain:'Northline.ca',name:'QA Owner',email:'qa@example.com',phone:'+1 705 555 0100',street:'1 Example Street',city:'Barrie',region:'ON',postalCode:'L4M 1A1',country:'CA'};
+const owner={domain:'Northline.ca',name:'QA Owner',email:'qa@example.com',phone:'+1 705 555 0100',street:'1 Example Street',city:'Barrie',region:'ON',postalCode:'L4M 1A1',country:'CA',caEligibility:{category:'citizen',eligible:true,agreementAccepted:true,version:'cpr-1.3_agreement-2.3'}};
 test('Domain owner validation rejects malformed domains and missing contact details',()=>{assert.equal(domainName('https://Northline.ca/'),'northline.ca');for(const invalid of ['example.ca/path','-name.ca','name..ca','name.ca?x=1'])assert.throws(()=>domainName(invalid));assert.equal(registrantDetails(owner).domain,'northline.ca');assert.throws(()=>registrantDetails({...owner,email:''}));assert.throws(()=>registrantDetails({...owner,country:'Canada'}));});
 const args={accountId:'a'.repeat(32),token:'fixture',domain:'northline.com'};
 const response=item=>async()=>({ok:true,json:async()=>({success:true,result:{domains:[item]}})});
@@ -12,3 +12,10 @@ test('Sandbox checks use only the sandbox endpoint and never purchase domains',a
 test('Registration explicitly uses customer ownership and never defaults to PageGenie contacts',()=>{const b=sandboxRegistrationBody({...owner,domain:'northline.com',organization:'Northline Renovations'});assert.equal(b.contacts.registrant.postal_info.name,owner.name);assert.equal(b.contacts.registrant.postal_info.organization,'Northline Renovations');assert.equal(b.contacts.registrant.email,owner.email);assert.equal(b.contacts.registrant.phone,'+1.7055550100');assert.equal(b.contacts.registrant.postal_info.address.country_code,'CA');assert.equal(b.auto_renew,false);assert.equal(b.years,1);assert.throws(()=>sandboxRegistrationBody({...owner,domain:'northline.ca'}));assert.throws(()=>sandboxRegistrationBody({...owner,domain:'northline.com',phone:'7055550100'}));});
 test('Registration mutations stay in sandbox and pending workflows stay pending',async()=>{let called;const result=await sandboxRegistrar({...args,details:{...owner,domain:'northline.com'},fetcher:async(url,options)=>{called={url,options};return {ok:true,json:async()=>({success:true,result:{completed:false,state:'in_progress'}})};}});assert.match(called.url,/\/registrar-sandbox\/registrations$/);assert.equal(JSON.parse(called.options.body).contacts.registrant.postal_info.name,owner.name);assert.equal(result.state,'in_progress');await assert.rejects(sandboxRegistrar({...args,operation:'delete'}));});
 test('A changed domain, currency, price or fee requires a new review',()=>{const a={domain:'northline.com',available:true,currency:'USD',registrarAmount:10.46,renewalAmount:10.46,serviceFee:2,serviceFeeCurrency:'CAD'};assert.equal(sameDomainPrice(a,{...a}),true);for(const patch of [{currency:'CAD'},{registrarAmount:11},{renewalAmount:11},{serviceFee:3},{available:false},{domain:'other.com'}])assert.equal(sameDomainPrice(a,{...a,...patch}),false);});
+
+test('.ca eligibility is enforced server-side without trusting supplied timestamps',()=>{
+ const valid=registrantDetails({...owner,caEligibility:{...owner.caEligibility,acceptedAt:'forged'}});
+ assert.deepEqual(valid.caEligibility,owner.caEligibility);
+ for(const caEligibility of [undefined,{}, {...owner.caEligibility,category:'resident'}, {...owner.caEligibility,eligible:false}, {...owner.caEligibility,agreementAccepted:false}, {...owner.caEligibility,version:'old'}])assert.throws(()=>registrantDetails({...owner,caEligibility}));
+ assert.equal(registrantDetails({...owner,domain:'northline.com',caEligibility:undefined}).caEligibility,undefined);
+});
