@@ -6,12 +6,13 @@ await build({entryPoints:['src/cloud.js'],bundle:true,format:'esm',minify:true,o
 let html=await readFile('PageGenie.html','utf8');
 html=html.replace('<meta name="robots" content="noindex, follow">','').replace('</head>',homeSEO+'</head>');
 html=html.replace('</head>',`<script>if(new URLSearchParams(location.search).has('domain')||new URLSearchParams(location.search).has('site'))document.documentElement.dataset.publicOpening='true';</script><style>html[data-public-opening] main,html[data-public-opening] header{visibility:hidden}</style></head>`);
+html=html.replace('</head>', '<script>if(new URLSearchParams(location.search).has("review"))location.replace("/owner.html");</script></head>');
 const ui=await readFile('src/account.html','utf8');
 const bundleVersion=createHash('sha256').update(await readFile('assets/cloud.js')).digest('hex').slice(0,12);
 const bodyEnd=html.lastIndexOf('</body>');
 html=html.slice(0,bodyEnd)+ui+`<script type="module" src="./assets/cloud.js?v=${bundleVersion}"></script>`+html.slice(bodyEnd);
 html=html.replace('<span class="badge">INTERACTIVE DEMO</span>','<span class="badge">EARLY PREVIEW</span><button class="ghost" id="accountButton" onclick="openAccount()">Sign in</button>');
-html=html.replace('<main class="wrap">','<main class="wrap"><div class="toolbar"><span class="small" id="cloudStatus">Connecting account services…</span><div class="row"><button class="secondary" onclick="cloudSave()">Save to account</button><button class="secondary" onclick="publishCloud()">Publish shareable preview ↗</button></div></div>');
+html=html.replace('<main class="wrap">','<main class="wrap"><div class="toolbar workspace-controls"><span class="small" id="cloudStatus">Connecting account services…</span><div class="row"><button class="secondary" onclick="cloudSave()">Save to account</button><button class="secondary" onclick="publishCloud()">Publish shareable preview ↗</button></div></div>');
 html=html.replace('<button class="full" style="margin-top:24px" type="submit">','<label class="label" for="generationMode">Generation mode</label><select id="generationMode"><option value="demo">Explore the demo</option><option value="live">Generate with AI</option></select><button class="full" style="margin-top:24px" type="submit">');
 html=html.replace('Standalone interactive prototype · No backend, API keys, or external assets','Early preview · Saved websites · Website plans · Domain sandbox');
 html=html.replace('No signup. No credit card. Just a little magic.','Explore the demo freely. Sign in and verify your email to generate with AI.');
@@ -22,3 +23,7 @@ const actionPage=(await readFile('src/auth-action.html','utf8')).replace('./asse
 await writeFile('auth.html',actionPage);
 
 await writeSEOFiles();
+
+await build({entryPoints:['src/owner.js'],bundle:true,format:'esm',minify:true,outfile:'assets/owner.js',target:['es2022'],legalComments:'eof'});
+const ownerVersion=createHash('sha256').update(await readFile('assets/owner.js')).digest('hex').slice(0,12);
+await writeFile('owner.html',(await readFile('src/owner.html','utf8')).replace('./assets/owner.js',`./assets/owner.js?v=${ownerVersion}`));
