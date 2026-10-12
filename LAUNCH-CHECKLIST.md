@@ -53,3 +53,11 @@ No soft launch or public paid launch is approved. Passing these tests does not r
 
 - 12 October: Auth App Check enforced; missing/forged attestation signup probes both returned 401 after propagation. Owner account refresh still works. Password minimum aligned with the eight-character UI requirement, without forcing existing-user resets.
 - Real test domain HTTPS now passes normal certificate validation (Google Trust Services, TLS 1.3), HTTP redirects to HTTPS, and Northline returns 200 with logo/email/phone links. Customer live billing remains off.
+
+## Customer polish — 12 October
+
+- Removed the early-preview badge, development footer and demo generation selector from the built customer site. Website creation uses AI; examples remain explicitly labelled fictional demonstrations.
+- Builder starts empty; saved drafts require an explicit Continue action. Domain search no longer starts with a sample name.
+- Removed fabricated visitor statistics and the placeholder QR image from the delivered customer document. Analytics use actual server counts or a plan/empty state; QR appears after successful publication.
+- Publication and plan messages use customer language. Domain receipts still explain when no real domain was purchased; production domain purchasing remains unavailable and must not be implied by cosmetic changes.
+- Build and 173 tests passed. Billing configuration remains testMode true; no live keys, prices, webhooks or registrar purchase routes were enabled.
