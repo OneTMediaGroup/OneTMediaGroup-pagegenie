@@ -1,3 +1,5 @@
+import {installHomeGenie} from './home-genie.js';
+installHomeGenie();
 import {guestHandoff} from './guest-handoff.js';
 import {wantsVisualChange} from '../functions/design-treatment.js';
 import {installSidebarGenie} from './sidebar-genie.js';

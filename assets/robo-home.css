@@ -8,3 +8,19 @@ body{background:#f5f8fe}body:has(#screen0:not(.hidden))>header{height:74px}main.
 #intake>.genie-goals{margin:0 0 18px!important;display:flex;flex-wrap:wrap;gap:6px}#intake>.genie-goals>p{display:none!important}#intake>.genie-goals button{font-size:13px;margin:0;min-height:44px;padding:9px 11px}#intake>.genie-goals button[aria-pressed=true]{background:#eaf1ff;border-color:#b4ccff;color:#1954d4}@media(max-width:760px){#intake>.genie-goals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:10px!important;gap:5px}#intake>.genie-goals button{font-size:12px;line-height:1.2;white-space:normal;padding:7px 4px;min-height:44px}}@media(min-width:761px){#screen0 #intake>.grid>div:nth-child(2){display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:0 8px;align-content:start}#screen0 #intake>.grid>div:nth-child(2)>.label,#screen0 #intake>.grid>div:nth-child(2)>small{grid-column:1/-1}#screen0 #intake>.grid>div:nth-child(2)>select{margin-bottom:0!important}#screen0 #intake .community-options~button{grid-column:1/-1;justify-self:start}#screen0 #intake .community-options{top:78px}}
 @media(min-width:761px) and (max-height:800px){body:has(#screen0:not(.hidden))>header{height:64px}main.wrap:has(#screen0:not(.hidden)){padding-top:16px!important}#screen0>.intake>#intake{padding:20px}#intake>.genie-goals{margin-bottom:10px!important}#screen0 #intake>p:first-of-type{display:none}}
 @media(min-width:761px) and (max-height:800px){#screen0>.intake>#intake{padding:16px}#screen0 #intake textarea{min-height:68px;height:68px}#intake>.genie-goals{margin-bottom:8px!important}#screen0 #intake h2{margin-bottom:6px}}
+
+/* The mascot opens a small, deliberate welcome tip. */
+.robo-genie.genie-welcome{pointer-events:auto;cursor:pointer;padding:0;border:0;background:transparent;border-radius:24px;box-shadow:none;filter:none;overflow:visible}
+.genie-welcome>img{display:block;width:100%;height:100%;object-fit:contain}
+.hero-message{pointer-events:none}.hero-message>*{pointer-events:auto}
+.robo-genie.genie-welcome:hover{filter:drop-shadow(0 0 8px #8dc8ff);transform:none}
+.robo-genie.genie-welcome:focus-visible{outline:3px solid #2463eb;outline-offset:-10px;mask-image:none}
+.home-genie-tip{position:absolute;z-index:5;right:0;top:150px;width:min(310px,100%);padding:22px;text-align:left;background:#fff;border:1px solid #ccddf8;border-radius:20px;box-shadow:0 14px 42px #173a7026;color:#142b50}
+.home-genie-tip[hidden]{display:none}.home-genie-tip strong{display:block;padding-right:24px;font-size:18px}
+#screen0>.hero .home-genie-tip p{font-size:16px;line-height:1.5;margin:12px 0 18px}
+.home-genie-tip .genie-tip-close{position:absolute;right:8px;top:7px;font-size:24px;min-width:44px;min-height:44px;padding:4px;border:0;background:transparent}
+.genie-tip-build{min-height:44px;width:100%}
+@media(max-width:760px){.home-genie-tip{top:90px;right:0}}
+@media(prefers-reduced-motion:reduce){.genie-welcome{transition:none}}
+
+#screen0>.hero:has(.home-genie-tip:not([hidden])){z-index:4}
