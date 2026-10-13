@@ -1,5 +1,5 @@
 {
-  "testMode": true,
+  "testMode": false,
   "portalConfiguration": "bpc_1UPU7j1uRlTVrdiryiOTIjYg",
   "plans": {
     "starter": {
