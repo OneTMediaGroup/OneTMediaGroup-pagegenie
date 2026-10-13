@@ -1,10 +1,10 @@
 # PageGenie launch checklist
 
-Updated 13 October 2026. Live payments and real registrar purchases remain disabled. This is the consolidated status record; an implemented feature alone is not launch approval.
+Updated 13 October 2026. New paid checkout remains disabled. Domain processing and owner refund controls were authorised for activation on 13 October; no transaction tests are authorised. This is the consolidated status record; an implemented feature alone is not launch approval.
 
 ## Current launch gates — 13 October (supersedes the historical priority list below)
 
-Completed: production billing migration (14 records), production credential/configuration deployment, Stripe notification activation with genuine signed delivery, free guest → account → publication acceptance, and the contact-before-policy phone check. Checkout, domain purchasing/processing and live refunds remain off. Scheduled domain-care operation was observed on 13 October (details in DOMAIN-CARE-OPERATIONS.md).
+Completed: production billing migration (14 records), production credential/configuration deployment, Stripe notification activation with genuine signed delivery, free guest → account → publication acceptance, and the contact-before-policy phone check. Checkout remains off. Domain processing and owner refund controls are active under explicit owner approval; no purchase or refund was submitted for verification. Scheduled domain-care operation was observed on 13 October (details in DOMAIN-CARE-OPERATIONS.md).
 
 Remaining:
 1. Owner business/policy sign-off: support/moderation retention periods and manual monthly review adopted 13 October (see PRIVACY-REQUEST-PROCEDURE.md). Owner will arrange tax filing/remittance; completion remains owner-confirmed before launch. Technical tax collection is not proof of remittance setup. Apply documented holds and provider-specific retention limitations.
@@ -184,3 +184,12 @@ Remaining before enabling sales: owner confirms tax filing arrangement, then exp
 
 
 Domain/refund preparation: 61 focused tests passed; no production orders or queued jobs at read-only inspection; existing refund secret enabled. Processing and refund activation deliberately deferred to explicit go (see STRIPE-CUTOVER-REVIEW.md). No new deployment or money movement needed for this readiness pass.
+
+
+## Authorised activation — 13 October 2026, 19:57 UTC
+
+Owner explicitly approved domain processing and owner refund controls while keeping checkout off and forbidding charges, refunds or purchases during verification. Supersedes the earlier preparation-only status. Set liveDomainProcessing=true and liveDomainRefunds=true; livePlanSales=false and liveDomainSales=false remain unchanged. Production mode and both notification switches remain enabled.
+
+61 focused tests passed. Deployed fulfilProductionDomains, reviewDomainService, stripeWebhook, createDomainCheckout, confirmDomainCheckout, registerDomain and domainRegistrationStatus; all seven independently confirmed ACTIVE. Verified billing-config.json inside the deployed source archive: processing/refunds true, both sales false. reviewDomainService binds STRIPE_LIVE_DOMAIN_REFUND_KEY; worker binds production Stripe/registrar/DNS credentials. Five-minute scheduler ENABLED; this check verified scheduler configuration, not a paid fulfilment cycle.
+
+Read-only checks before and after deployment found zero production jobs and zero production domain orders. No checkout, charge, registrar create or refund request submitted. Refund write capability was not exercised; existing isolated recovery tests verify duplicate/uncertain-outcome protections. Customer sites and examples untouched. Next step remains separate explicit approval to open checkout; enabling these controls is not approval to run a real transaction test.

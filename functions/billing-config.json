@@ -28,7 +28,7 @@
     }
   },
   "liveDomainSales": false,
-  "liveDomainProcessing": false,
+  "liveDomainProcessing": true,
   "liveDomainNotifications": true,
   "productionDomains": {
     "stripeAccountId": "acct_1Ti3hv1uRlTVrdir",
@@ -69,5 +69,5 @@
       }
     }
   },
-  "liveDomainRefunds": false
+  "liveDomainRefunds": true
 }

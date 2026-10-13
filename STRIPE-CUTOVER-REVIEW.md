@@ -74,3 +74,12 @@ After explicit activation approval:
 4. Only after owner approval open checkout. If stopping new sales later, leave processing available for already-paid orders unless a processing incident requires its own pause. Preserve all customer sites and records.
 
 Current preparation adds no scheduler changes, permission grants, credentials, charges or domain purchases. The refund write credential remains unbound until the separately approved activation deployment.
+
+
+## Authorised activation — 13 October 2026, 19:57 UTC
+
+Owner explicitly approved domain processing and owner refund controls while keeping checkout off and forbidding charges, refunds or purchases during verification. Supersedes the earlier preparation-only status. Set liveDomainProcessing=true and liveDomainRefunds=true; livePlanSales=false and liveDomainSales=false remain unchanged. Production mode and both notification switches remain enabled.
+
+61 focused tests passed. Deployed fulfilProductionDomains, reviewDomainService, stripeWebhook, createDomainCheckout, confirmDomainCheckout, registerDomain and domainRegistrationStatus; all seven independently confirmed ACTIVE. Verified billing-config.json inside the deployed source archive: processing/refunds true, both sales false. reviewDomainService binds STRIPE_LIVE_DOMAIN_REFUND_KEY; worker binds production Stripe/registrar/DNS credentials. Five-minute scheduler ENABLED; this check verified scheduler configuration, not a paid fulfilment cycle.
+
+Read-only checks before and after deployment found zero production jobs and zero production domain orders. No checkout, charge, registrar create or refund request submitted. Refund write capability was not exercised; existing isolated recovery tests verify duplicate/uncertain-outcome protections. Customer sites and examples untouched. Next step remains separate explicit approval to open checkout; enabling these controls is not approval to run a real transaction test.
