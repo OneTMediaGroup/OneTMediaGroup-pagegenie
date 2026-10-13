@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 import {readFile,writeFile} from 'node:fs/promises';
 await build({entryPoints:['src/cloud.js'],bundle:true,format:'esm',minify:true,outfile:'assets/cloud.js',target:['es2022'],legalComments:'eof'});
 const accessibilityCSS=await readFile('src/accessibility.css','utf8');
-const accessible=html=>html.replace('</head>','<style data-accessibility>'+accessibilityCSS+'</style></head>');
+const accessible=html=>html.replace('</head>','<link rel="icon" type="image/svg+xml" href="/assets/genie-lamp.svg"><style data-accessibility>'+accessibilityCSS+'</style></head>');
 let html=accessible(await readFile('PageGenie.html','utf8'));
 html=html.replace('<meta name="robots" content="noindex, follow">','').replace('</head>',homeSEO+'</head>');
 html=html.replace('</head>',`<script>if(new URLSearchParams(location.search).has('domain')||new URLSearchParams(location.search).has('site'))document.documentElement.dataset.publicOpening='true';</script><style>html[data-public-opening] main,html[data-public-opening] header{visibility:hidden}</style></head>`);
