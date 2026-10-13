@@ -3,7 +3,7 @@ import {HttpsError} from 'firebase-functions/v2/https';
 import {intake} from './generation.js';
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
-const limit=()=>new HttpsError('resource-exhausted','Your free first website is ready. Create your free account to keep it and make more changes.',{guestLimit:true});
+const limit=()=>new HttpsError('resource-exhausted','This browser has used its free guest build. Create a free account to build another website. No payment needed.',{guestLimit:true});
 export async function generateGuestDraft({db,request,generate,reserveAI,now=Date.now()}){
  if(!request.app)throw new HttpsError('failed-precondition','Refresh PageGenie to finish the browser security check.');
  const raw=request.data||{},ip=request.rawRequest?.ip;
