@@ -18,7 +18,6 @@ html=html.replace('<span class="badge">INTERACTIVE DEMO</span>','<button class="
 html=html.replace('<main class="wrap">','<main class="wrap"><div class="toolbar workspace-controls"><span class="small" id="cloudStatus">Connecting account services…</span><div class="row"><button class="secondary" onclick="cloudSave()">Save to account</button><button class="secondary" onclick="publishCloud()">Publish my website ↗</button></div></div>');
 html=html.replace('<button class="full" style="margin-top:24px" type="submit">','<input id="generationMode" type="hidden" value="live"><button class="full" style="margin-top:24px" type="submit">');
 html=html.replace('Standalone interactive prototype · No backend, API keys, or external assets','Your business. Your brand. Your website.');
-html=html.replace('No signup. No credit card. Just a little magic.','Your first website is free. No signup or credit card needed.');
 // Remove prototype-only results from the customer document before it reaches the browser.
 const customer=new JSDOM(html),page=customer.window.document;
 page.querySelector('#domainSearch').value='';
