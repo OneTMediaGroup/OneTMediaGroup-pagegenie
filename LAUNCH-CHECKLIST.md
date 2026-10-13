@@ -4,13 +4,14 @@ Updated 13 October 2026. Live payments and real registrar purchases remain disab
 
 ## Current launch gates — 13 October (supersedes the historical priority list below)
 
-Completed since the older entries: production domain purchase/connection orchestration and .ca declaration validation; separate live Stripe prices, restricted checkout/notification/refund credentials; disabled live webhook destinations; tax classification/configuration review; production recovery safeguards and sandbox owner refund replay test. See DOMAIN-PRODUCTION-READINESS.md and billing records for exact scope. A real .ca purchase and live money movement have not been tested and are not authorised.
+Completed: production billing migration (14 records), production credential/configuration deployment, Stripe notification activation with genuine signed delivery, free guest → account → publication acceptance, and the contact-before-policy phone check. Checkout, domain purchasing/processing and live refunds remain off. Scheduled domain-care operation was observed on 13 October (details in DOMAIN-CARE-OPERATIONS.md).
 
 Remaining:
-1. Registrar expiry reconciliation is deployed (325 tests and a real read-only registrar check passed); observe scheduled operation as part of final acceptance. Renewal/transfer **requests** work, but actual fulfilment remains owner-managed; document provider-side confirmation and customer approval before any paid action. Do not market those requests as automatic renewals/transfers.
-2. Final production cutover preflight: webhook destination activation/deployment order, credential permissions/expiry, customer portal/checkout branding and environment migration. Keep all live switches off until explicit approval. No real-money rehearsal is authorised; this remains a known untested boundary, not a reason to charge the owner.
-3. Owner business/policy review, including remaining retention decisions for billing/security/support/provider records. Configuration/tests are not legal or accounting approval.
-4. Final clean guest → free account → free publication acceptance and optional test upgrade on phone/desktop after the final release, then owner launch approval.
+1. Owner business/policy sign-off: confirm published policies and retention decisions for billing/security/support/provider records, plus tax filing/remittance responsibilities. Technical tax collection is not proof of remittance setup.
+2. Final release preflight immediately before launch: recheck service health, credential expiry, live price/portal configuration and off-switches against the agreed release. Prior successful checks are recorded; repeat only time-sensitive checks rather than restarting the test programme.
+3. Explicit owner approval of the exact switches to enable. Notification intake is already enabled; checkout, domain processing and live refunds are separate controls and must not be enabled implicitly.
+
+Known acceptance limits: no real-money transaction or real .ca purchase rehearsal is authorised. Production provider behaviour at that boundary remains untested. Renewals and transfers are owner-managed requests, not automatic fulfilment. Domain-care schedule runs successfully, but there are currently no eligible paid production orders to reconcile end-to-end. Phone acceptance used a responsive Chrome viewport, not a physical handset.
 
 ## Verified
 

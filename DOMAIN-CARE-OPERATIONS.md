@@ -71,3 +71,17 @@ Reminder delivery also requires a verified record no older than eight hours and 
 325 tests pass, including renewal date changes, provider errors, wrong-domain responses, nonactive states, fixture isolation, concurrent updates/deletion and freshness boundaries. Read-only Cloudflare check of pagegenie-domain-test.com returned active, expiry 2027-10-12T19:15:21Z, auto-renew false. No domain changes or customer emails were initiated by that check. API contract: https://developers.cloudflare.com/api/resources/registrar/subresources/registrations/methods/get/ .
 
 Deployment confirmed: checkDomainCare and notifyDomainExpiry updated successfully on 13 October. The automatic schedule was not manually triggered, avoiding unsolicited customer notices. All live payment/refund flags remain false.
+
+
+## Scheduled-operation observation — 13 October 2026
+Read-only production audit: Cloud Scheduler job firebase-schedule-checkDomainCare-northamerica-northeast1 is ENABLED every 15 minutes. Last attempt 2026-10-13T19:30:01.887508Z reported no error; operationsHealth/domainCare completed at 19:30:02.287Z, checked eight records, and had no remaining cursor. No eligible non-fixture production domain orders existed. This verifies scheduled execution, not a real customer renewal/expiry cycle. No job was manually triggered, and the audit sent no customer notices or registrar changes.
+
+## Owner renewal and transfer handling
+1. Match the request to its signed-in owner, saved project and exact registered domain. Check lifecycle/suspension state, current registrar status, expiry and any unresolved order before acting.
+2. For renewal, obtain the provider's current renewal quote and term. Show the customer the total, currency, service fee (if any), tax treatment and auto-renew setting. Obtain explicit approval before any paid action; a help request is not payment authorisation.
+3. For transfer, verify the customer's request through their account, check provider locks and eligibility, and explain the provider's requirements and any expiry risk. Never put a transfer code in a public note or ordinary support log; use the provider's protected handoff. Do not promise transfer completion until provider confirmation.
+4. Perform only the approved provider action. If its result is uncertain, check the existing operation before retrying; do not issue a second purchase or assume failure. Escalate unresolved status and keep the request open.
+5. Reconcile provider confirmation into the saved domain state, including verified expiry and auto-renew after renewal, or confirmed transfer status. Check website/DNS/HTTPS separately where applicable. A support note alone must never claim to have renewed a domain or changed its expiry.
+6. Mark the request handled only after confirmation, with a plain-language customer outcome and next steps. Retain the minimal receipt/approval evidence under the approved retention policy. A failed registration refund follows the verified owner refund workflow; domain renewals/registrations are not assumed refundable.
+
+These instructions do not authorise charges, transfers or credential disclosure. Live checkout, registrar processing and refunds remain off until separately approved.
