@@ -1,6 +1,6 @@
 # PageGenie content safety — launch gate
 
-Payments and domain registration remain test/sandbox. Policy version 2026-10-11.
+Live payments remain off. Customer domain fulfilment remains gated separately from the previously approved real-domain readiness test. Policy version 2026-10-11.
 
 ## Implemented
 - Server-side OpenAI moderation for website prompts/output, generated logos, uploaded logos, cinematic prompts/images, final publishing and HTML export. Edited text, contact fields, raster uploads and rendered SVG artwork are included. Provider failure blocks the new operation; the previous public version is unchanged.
@@ -46,3 +46,8 @@ Consolidated launch status: LAUNCH-CHECKLIST.md. AI generation request ceilings 
 - Regression fixtures verify attribute-only wording reaches the rejecting moderator, multilingual/disguised text is preserved for review, image payload separation, unreadable-image refusal and fail-closed provider responses. These are integration-wiring fixtures, not a live model accuracy or false-positive calibration exercise.
 - Full local suite: 181 passing tests. Fresh isolated Auth/Firestore rehearsal: 146 passing access-isolation assertions; no production account data or provider calls.
 - Deploy target: publishWebsite and downloadWebsite. Existing publication is not retroactively audited by this change. Realistic multilingual/image adversarial provider acceptance, allowed-read volume and other consolidated launch gates remain open. Live payments stay off.
+
+## Final acceptance — 12 October 2026
+The standard moderation endpoint does not cover hate/harassment for image-only input (https://developers.openai.com/api/docs/guides/moderation). Each retained image now also receives a strict allow/block/review vision policy assessment using gpt-4.1-mini with storage disabled. A review result requests a changed image or human support; it does not publish automatically. Provider failures/refusals/malformed responses block the new operation. This adds a paid vision request per image; request-count ceilings are not a dollar-cost guarantee.
+
+34 live synthetic/layout cases and 200 local tests passed; see LAUNCH-CHECKLIST.md and content-safety-acceptance.json for finite scope and rate-limit interruptions. No harmful fixture was published. Continue human review and realistic calibration; these checks do not guarantee detection of every harmful image, language or future external stream.
