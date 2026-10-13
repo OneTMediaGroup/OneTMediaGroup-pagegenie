@@ -1,3 +1,4 @@
+import {caContactExtensions} from './ca-eligibility.js';
 import {domainName,customerRegistrationBody,sameDomainPrice} from './domain-registration.js';
 
 // Production purchases are deliberately not connected to the test checkout.
@@ -6,7 +7,12 @@ export function reviewedRegistration(details,quote,approval,now=Date.now()){
  if(!approval||approval.domain!==body.domain_name||approval.expiresAt<=now||!Number.isFinite(approval.expiresAt)||approval.registrantConfirmed!==true||approval.agreementAccepted!==true)throw Error('A current domain purchase and registrant approval is required.');
  if(!quote?.available||quote.domain!==body.domain_name||!Number.isFinite(quote.expiresAt)||quote.expiresAt<=now||!sameDomainPrice(quote,approval.quote))throw Error('Review current domain pricing before registration.');
  // Start with the extensions whose contact requirements are already implemented.
- if(!/\.(com|net)$/.test(body.domain_name))throw Error('This extension requires a reviewed registration schema before production use.');
+ if(!/\.(com|net|ca)$/.test(body.domain_name))throw Error('This extension requires a reviewed registration schema before production use.');
+ if(body.domain_name.endsWith('.ca')){
+  body.contact_extensions=caContactExtensions(details.caEligibility);
+  // Provider requires the organization key even for an individual; never invent a company.
+  body.contacts.registrant.postal_info.organization=String(details.organization||'').trim();
+ }
  return body;
 }
 export async function productionRegistrar({accountId,token,operation='status',domain,details,quote,approval,fetcher=fetch}){

@@ -1,0 +1,400 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "domain_name",
+    "contact_extensions"
+  ],
+  "properties": {
+    "domain_name": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(([a-z0-9]|[a-z0-9][a-z0-9]|[a-z0-9][-a-z0-9]+[a-z0-9])\\.)+[a-z]{2,}$"
+    },
+    "years": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "default": 1
+    },
+    "privacy_mode": {
+      "type": "string",
+      "enum": [
+        "off",
+        "redaction"
+      ],
+      "default": "redaction"
+    },
+    "auto_renew": {
+      "type": "boolean",
+      "default": false
+    },
+    "contacts": {
+      "type": "object",
+      "required": [
+        "registrant"
+      ],
+      "properties": {
+        "registrant": {
+          "type": "object",
+          "required": [
+            "phone",
+            "email",
+            "postal_info"
+          ],
+          "properties": {
+            "fax": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "postal_info": {
+              "type": "object",
+              "required": [
+                "name",
+                "address",
+                "organization"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "address": {
+                  "type": "object",
+                  "required": [
+                    "street",
+                    "city",
+                    "state",
+                    "postal_code",
+                    "country_code"
+                  ],
+                  "properties": {
+                    "city": {
+                      "type": "string"
+                    },
+                    "state": {
+                      "type": "string"
+                    },
+                    "street": {
+                      "type": "string"
+                    },
+                    "postal_code": {
+                      "type": "string"
+                    },
+                    "country_code": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "organization": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "billing": {
+          "type": "object",
+          "properties": {
+            "fax": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "postal_info": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "address": {
+                  "type": "object",
+                  "properties": {
+                    "city": {
+                      "type": "string"
+                    },
+                    "state": {
+                      "type": "string"
+                    },
+                    "street": {
+                      "type": "string"
+                    },
+                    "postal_code": {
+                      "type": "string"
+                    },
+                    "country_code": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "organization": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "description": "Optional. If omitted, Badger may derive this contact from contacts.registrant when required by the registry."
+        },
+        "technical": {
+          "type": "object",
+          "required": [
+            "phone",
+            "email",
+            "postal_info"
+          ],
+          "properties": {
+            "fax": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "postal_info": {
+              "type": "object",
+              "required": [
+                "name",
+                "organization",
+                "address"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "address": {
+                  "type": "object",
+                  "required": [
+                    "street",
+                    "city",
+                    "state",
+                    "postal_code",
+                    "country_code"
+                  ],
+                  "properties": {
+                    "city": {
+                      "type": "string"
+                    },
+                    "state": {
+                      "type": "string"
+                    },
+                    "street": {
+                      "type": "string"
+                    },
+                    "postal_code": {
+                      "type": "string"
+                    },
+                    "country_code": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "organization": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "description": "Optional. If omitted, Badger may derive this contact from contacts.registrant when required by the registry."
+        },
+        "administrator": {
+          "type": "object",
+          "required": [
+            "phone",
+            "email",
+            "postal_info"
+          ],
+          "properties": {
+            "fax": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "postal_info": {
+              "type": "object",
+              "required": [
+                "name",
+                "organization",
+                "address"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "address": {
+                  "type": "object",
+                  "required": [
+                    "street",
+                    "city",
+                    "state",
+                    "postal_code",
+                    "country_code"
+                  ],
+                  "properties": {
+                    "city": {
+                      "type": "string"
+                    },
+                    "state": {
+                      "type": "string"
+                    },
+                    "street": {
+                      "type": "string"
+                    },
+                    "postal_code": {
+                      "type": "string"
+                    },
+                    "country_code": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "organization": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "description": "Optional. If omitted, Badger may derive this contact from contacts.registrant when required by the registry."
+        }
+      },
+      "additionalProperties": false
+    },
+    "acknowledgements": {
+      "type": "object",
+      "properties": {}
+    },
+    "contact_extensions": {
+      "type": "object",
+      "properties": {
+        "ca_trademark": {
+          "title": "Canadian Trademark",
+          "oneOf": [
+            {
+              "type": "string",
+              "const": "0",
+              "title": "No Canadian trademark"
+            },
+            {
+              "type": "string",
+              "const": "1",
+              "title": "Holds a Canadian trademark"
+            }
+          ]
+        },
+        "ca_legal_type": {
+          "title": "Legal Type",
+          "oneOf": [
+            {
+              "type": "string",
+              "const": "ABO",
+              "title": "Aboriginal Peoples"
+            },
+            {
+              "type": "string",
+              "const": "ASS",
+              "title": "Canadian Unincorporated Association"
+            },
+            {
+              "type": "string",
+              "const": "CCO",
+              "title": "Canadian Corporation"
+            },
+            {
+              "type": "string",
+              "const": "CCT",
+              "title": "Canadian Citizen"
+            },
+            {
+              "type": "string",
+              "const": "EDU",
+              "title": "Canadian Educational Institution"
+            },
+            {
+              "type": "string",
+              "const": "GOV",
+              "title": "Government Entity in Canada"
+            },
+            {
+              "type": "string",
+              "const": "HOP",
+              "title": "Canadian Hospital"
+            },
+            {
+              "type": "string",
+              "const": "INB",
+              "title": "Indian Band"
+            },
+            {
+              "type": "string",
+              "const": "LAM",
+              "title": "Canadian Library, Archive, or Museum"
+            },
+            {
+              "type": "string",
+              "const": "LGR",
+              "title": "Legal Representative of a Canadian Citizen or Permanent Resident"
+            },
+            {
+              "type": "string",
+              "const": "MAJ",
+              "title": "Her/His Majesty the Queen/King"
+            },
+            {
+              "type": "string",
+              "const": "OMK",
+              "title": "Official Mark Registered in Canada"
+            },
+            {
+              "type": "string",
+              "const": "PLT",
+              "title": "Canadian Political Party"
+            },
+            {
+              "type": "string",
+              "const": "PRT",
+              "title": "Partnership Registered in Canada"
+            },
+            {
+              "type": "string",
+              "const": "RES",
+              "title": "Permanent Resident of Canada"
+            },
+            {
+              "type": "string",
+              "const": "TDM",
+              "title": "Trade-mark Registered in Canada (by a non-Canadian owner)"
+            },
+            {
+              "type": "string",
+              "const": "TRD",
+              "title": "Canadian Trade Union"
+            },
+            {
+              "type": "string",
+              "const": "TRS",
+              "title": "Trust Established in Canada"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ca_legal_type"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

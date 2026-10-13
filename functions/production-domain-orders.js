@@ -9,7 +9,7 @@ export function assertProductionPayment(session,order,uid){
  return pi.id;
 }
 function resultState(result,order){
- if(result?.domain_name!==order.details.domain)return 'unknown';
+ if((result?.context?.domain_name||result?.domain_name)!==order.details.domain||(result?.domain_name&&result.domain_name!==order.details.domain)||(result?.context?.domain_name&&result.context.domain_name!==order.details.domain))return 'unknown';
  if(result.completed===true&&result.state==='succeeded'&&result.context?.registration?.domain_name===order.details.domain&&result.context.registration.status==='active')return 'registered';
  if(result.completed===true&&result.state==='failed')return 'failed';
  return 'pending';

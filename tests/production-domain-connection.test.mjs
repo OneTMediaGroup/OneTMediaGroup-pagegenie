@@ -1,0 +1,25 @@
+import {readFileSync} from 'node:fs';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {connectProductionDomain as connect} from '../functions/production-domain-connection.js';
+import {CA_CATEGORIES,CA_CONSENT_VERSION,caContactExtensions} from '../functions/ca-eligibility.js';
+import {reviewedRegistration} from '../functions/domain-provisioning.js';
+const uid='customer',projectId='12345678-1234-1234-1234-123456789012',domain='customer.ca';
+function setup(){
+ const order={orderId:'one',projectId,environment:'production',status:'registered',paymentStatus:'paid',details:{domain}};
+ const records=new Map([[`users/${uid}/domainOrders/${projectId}`,order],['productionDomainClaims/'+domain,{uid,projectId,orderId:'one'}],[`users/${uid}/billing/${projectId}`,{paid:true,plan:'complete',status:'active'}],['publishedSites/'+projectId,{hosting:true,ownerId:uid}]]);
+ const snapshot=p=>({data:()=>structuredClone(records.get(p))});let calls=0;
+ const db={doc:path=>({path}),runTransaction:async fn=>fn({get:async r=>snapshot(r.path),set:(r,v,options)=>records.set(r.path,options?.merge?{...records.get(r.path),...v}:v)})};
+ const deps={db,uid,projectId,order,ensureHosting:async()=>{calls++;return {ready:true,status:'connected'}},applyDns:async()=>{calls++;return {status:'awaiting-dns'}}};
+ return {records,deps,get calls(){return calls}};
+}
+test('Only verified production owner, active account and paid plan can connect',async()=>{
+ for(const [path,value,hold] of [['productionDomainClaims/'+domain,{uid:'other'},false],['accountLifecycle/'+uid,{status:'deleted'},false],['hostedDomains/'+domain,{uid:'other'},false],[`users/${uid}/billing/${projectId}`,{paid:false},true],['siteRestrictions/'+projectId,{suspended:true},true]]){const h=setup();h.records.set(path,value);if(hold)assert.equal((await connect(h.deps)).ready,false);else await assert.rejects(connect(h.deps));assert.equal(h.calls,0);}
+});
+test('Pending HTTPS never enables site; exact owner mapping is retained after readiness',async()=>{const h=setup();h.deps.ensureHosting=async()=>({ready:false,status:'awaiting-https',resource:{}});assert.equal((await connect(h.deps)).ready,false);assert.equal(h.records.get('hostedDomains/'+domain).status,'connecting');h.deps.ensureHosting=async()=>({ready:true,status:'connected'});assert.equal((await connect(h.deps)).ready,true);assert.equal(h.records.get('hostedDomains/'+domain).status,'enabled');});
+test('Payment or suspension changes during provisioning prevent activation',async()=>{const h=setup();h.deps.ensureHosting=async()=>{h.records.set('siteRestrictions/'+projectId,{suspended:true});return {ready:true,status:'connected'}};assert.equal((await connect(h.deps)).ready,false);assert.equal(h.records.get('hostedDomains/'+domain).status,'disabled');});
+test('DNS conflicts stay held and never enable a domain',async()=>{const h=setup();h.deps.ensureHosting=async()=>({ready:false,status:'awaiting-dns',resource:{}});h.deps.applyDns=async()=>({status:'needs-review'});assert.equal((await connect(h.deps)).status,'needs-review');assert.equal(h.records.get('hostedDomains/'+domain).status,'connecting');});
+test('Every CIRA category maps to a reviewed provider code and requires current consent',()=>{assert.equal(new Set(CA_CATEGORIES.map(([category])=>caContactExtensions({category,eligible:true,agreementAccepted:true,version:CA_CONSENT_VERSION}).ca_legal_type)).size,18);for(const patch of [{eligible:false},{agreementAccepted:false},{version:'old'},{category:'other'}])assert.throws(()=>caContactExtensions({category:'citizen',eligible:true,agreementAccepted:true,version:CA_CONSENT_VERSION,...patch}));});
+test('CA production payload preserves the individual and explicit CIRA eligibility',()=>{const details={domain,name:'Test Owner',organization:'',email:'owner@example.com',phone:'+1 705 555 0100',street:'1 Example St',city:'Barrie',region:'ON',postalCode:'L4M 1A1',country:'CA',caEligibility:{category:'citizen',eligible:true,agreementAccepted:true,version:CA_CONSENT_VERSION}};const quote={domain,available:true,expiresAt:Date.now()+300000,currency:'USD',registrarAmount:10,renewalAmount:10,serviceFee:2,serviceFeeCurrency:'CAD'};const body=reviewedRegistration(details,quote,{domain,expiresAt:quote.expiresAt,quote,registrantConfirmed:true,agreementAccepted:true});assert.deepEqual(body.contact_extensions,{ca_legal_type:'CCT'});assert.equal(body.contacts.registrant.postal_info.organization,'');assert.equal(body.auto_renew,false);assert.throws(()=>reviewedRegistration({...details,caEligibility:null},quote,{domain,expiresAt:quote.expiresAt,quote,registrantConfirmed:true,agreementAccepted:true}));});
+
+test('Eligibility codes match the production discovery schema snapshot',()=>{const schema=JSON.parse(readFileSync(new URL('./fixtures/cloudflare-ca-registration-schema.json',import.meta.url)));const codes=schema.properties.contact_extensions.properties.ca_legal_type.oneOf.map(x=>x.const);assert.deepEqual(CA_CATEGORIES.map(([category])=>caContactExtensions({category,eligible:true,agreementAccepted:true,version:CA_CONSENT_VERSION}).ca_legal_type).sort(),codes.sort());});

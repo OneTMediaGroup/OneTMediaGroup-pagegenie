@@ -12,3 +12,10 @@ export function validateCaEligibility(input){
  if(input.agreementAccepted!==true||input.version!==CA_CONSENT_VERSION)throw Error('Read and accept the current CIRA Registrant Agreement.');
  return {category:input.category,eligible:true,agreementAccepted:true,version:CA_CONSENT_VERSION};
 }
+
+// Values verified against Cloudflare production /registrar/extensions/ca, 2026-10-13.
+export const CA_LEGAL_TYPES=Object.freeze({'citizen':'CCT','permanent-resident':'RES','corporation':'CCO','legal-representative':'LGR','trust':'TRS','partnership':'PRT','association':'ASS','trade-union':'TRD','political-party':'PLT','education':'EDU','library-museum':'LAM','crown':'MAJ','band':'INB','indigenous':'ABO','government':'GOV','hospital':'HOP','trademark':'TDM','official-mark':'OMK'});
+export function caContactExtensions(input){
+ const consent=validateCaEligibility(input);
+ return {ca_legal_type:CA_LEGAL_TYPES[consent.category]};
+}
