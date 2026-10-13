@@ -120,3 +120,7 @@ No soft launch or public paid launch is approved. Passing these tests does not r
 - Added a staged, disabled-by-default production order core with live-payment checks, atomic order/domain reservation, no blind purchase retries, separate connection recovery, and nine passing fixture tests.
 - This does not close production domain fulfilment: no trigger, credentials, retry scheduler or alert delivery is bound. See DOMAIN-PRODUCTION-READINESS.md for remaining integration and live verification.
 - Live payments remain off; no purchase performed.
+
+## Final Stripe/access review — 13 October
+
+See STRIPE-CUTOVER-REVIEW.md for verified prices, portal, disabled destinations/endpoints, deployed secret bindings, activation/rollback order and remaining named-account migration holds. Added separate domain processing gate so stopping new sales need not strand paid orders; all gates remain off. One disposable synthetic account is in 30-day recovery; owner, named testers and public examples preserved. Remaining 8 billing holds must be resolved deliberately before those sites can upgrade in live mode. No real charges, refunds or purchases.

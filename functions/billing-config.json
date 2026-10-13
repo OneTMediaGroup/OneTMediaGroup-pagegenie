@@ -28,6 +28,7 @@
     }
   },
   "liveDomainSales": false,
+  "liveDomainProcessing": false,
   "productionDomains": {
     "stripeAccountId": "acct_1Ti3hv1uRlTVrdir",
     "taxMode": "stripe-automatic",

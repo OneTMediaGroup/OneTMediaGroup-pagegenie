@@ -1,8 +1,9 @@
+import {liveDomainSalesEnabled} from './domain-launch-gates.js';
 // Server-owned configuration only. Requests cannot select live mode or supply prices.
 export const DOMAIN_AGREEMENT_VERSION='cloudflare-domain-2026-10';
 export function domainEnvironment(config){
  if(config.testMode===true)return 'sandbox';
- if(config.testMode===false&&config.liveDomainSales===true)return 'production';
+ if(liveDomainSalesEnabled(config))return 'production';
  throw Error('Domain purchases are not available yet.');
 }
 export function assertDomainMode(order,config,key){
