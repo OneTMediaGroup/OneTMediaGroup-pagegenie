@@ -22,7 +22,7 @@ test('dashboard category changes preserve project context and show readable acti
 
 test('launch checklist uses saved contact and paid registration state, with optional upgrades',async()=>{
  const s=setup(async()=>[{id:'saved-one',name:'Northline',draft:JSON.stringify({businessContact:{contactPhone:'7055550123'},plan:'complete',domain:'demo.ca'}),published:true,billing:{paid:false},domain:{status:'pending',domain:'northline.ca'}}]);await s.ui.open();
- const list=s.el('dashCards').querySelector('.launch-checklist');assert.equal(list.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'),'2');assert.match(list.textContent,/optional for a free preview/);assert.equal(list.querySelectorAll('.complete').length,2);
+ const list=s.el('dashCards').querySelector('.launch-checklist');assert.equal(list.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'),'2');assert.match(list.textContent,/optional for a free website/);assert.equal(list.querySelectorAll('.complete').length,2);
  for(const b of list.querySelectorAll('button'))b.click();assert.deepEqual(s.actions,[['saved-one','details'],['saved-one','billing'],['saved-one','domains'],['saved-one','edit']]);
 });
 test('refreshing after completion updates checklist from authoritative saved state',async()=>{

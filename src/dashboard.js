@@ -29,13 +29,13 @@ export function installDashboard({document,context,load,openProject,newProject,a
     const registered=item.domain?.status==='registered';
     const rows=[
      {label:'Business details',target:'details',done:details,hint:details?'Contact details saved':'Add an email or phone for enquiries'},
-     {label:'Your plan',target:'billing',done:paid,hint:item.metadataError?'Refresh to check status':paid?plan+' plan ready':'Optional · publish a free preview first'},
+     {label:'Your plan',target:'billing',done:paid,hint:item.metadataError?'Refresh to check status':paid?plan+' plan ready':'Optional · publish a free website first'},
      {label:'Your domain',target:'domains',done:registered,hint:item.metadataError?'Refresh to check status':registered?domain+' · registered':domain?'Finish registering '+domain:'Optional · choose your own address'},
      {label:'Publish your website',target:item.published?'edit':'publish',done:!!item.published,hint:item.published?'Published · edit and publish updates anytime':details?'Ready when you are':'Add contact details, then publish'}
     ];
     const count=rows.filter(r=>r.done).length;
     const checklist=document.createElement('section');checklist.className='launch-checklist';checklist.setAttribute('aria-label','Launch checklist · '+item.name);
-    checklist.innerHTML=`<h4>Launch checklist</h4><p>${count} of 4 complete · A plan and domain are optional for a free preview.</p><div class="launch-progress" role="progressbar" aria-label="Launch checklist" aria-valuemin="0" aria-valuemax="4" aria-valuenow="${count}"><span style="width:${count*25}%"></span></div>`;
+    checklist.innerHTML=`<h4>Launch checklist</h4><p>${count} of 4 complete · A plan and domain are optional for a free website.</p><div class="launch-progress" role="progressbar" aria-label="Launch checklist" aria-valuemin="0" aria-valuemax="4" aria-valuenow="${count}"><span style="width:${count*25}%"></span></div>`;
     for(const row of rows){const button=document.createElement('button');button.className='launch-row'+(row.done?' complete':'');button.setAttribute('aria-label',row.label+' · '+row.hint+' · '+item.name);button.innerHTML=`<span class="launch-state" aria-hidden="true">${row.done?'✓':'○'}</span><span><strong>${esc(row.label)}</strong><small>${esc(row.hint)}</small></span><span class="launch-arrow" aria-hidden="true">→</span>`;button.onclick=()=>run(item,row.target);checklist.append(button)}
     body.querySelector('.dash-primary').before(checklist);
    }
