@@ -83,3 +83,4 @@ export {saveProject} from './project-save.js';
 export {domainManagement,reviewDomainService,checkDomainCare,queueDomainRecovery,notifyDomainRequest,notifyDomainExpiry} from './domain-care.js';
 
 export {automaticDomainConnections} from './automatic-domain-connections.js';
+export {fulfilProductionDomains} from './production-domain-fulfilment.js';

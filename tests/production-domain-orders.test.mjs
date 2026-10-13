@@ -29,3 +29,13 @@ test('A delayed pending provider response cannot overwrite a registered result',
 test('Successful DNS recovery clears the outstanding alert flag without repurchasing',async()=>{const h=harness();h.deps.connect=async()=>{throw Error('DNS unavailable')};await run(h.deps);assert.equal(h.order.ownerAlertRequired,true);h.deps.connect=async()=>({ready:true,status:'connected'});await run(h.deps);assert.equal(h.order.ownerAlertRequired,false);assert.equal(h.order.nextAttemptAt,null);assert.equal(h.submits,1);});
 
 test('Cloudflare context domain response is recognised; conflicting identities are held',async()=>{const h=harness();h.deps.register=async()=>({state:'succeeded',completed:true,context:{domain_name:details.domain,registration:success.context.registration}});await run(h.deps);assert.equal(h.order.status,'registered');const x=harness();x.deps.register=async()=>({...success,context:{...success.context,domain_name:'other.com'}});await run(x.deps);assert.equal(x.order.status,'unknown');assert.equal(x.connections,0);});
+
+test('Payment event to durable job to registration to connection completes once',async()=>{
+ const {queueProductionDomainPayment,runProductionDomainJob}=await import('../functions/domain-payment-handoff.js');const h=harness();
+ const event={livemode:true,type:'checkout.session.completed',data:{object:h.payment}};
+ await queueProductionDomainPayment({db:h.deps.db,event,config:{testMode:false,liveDomainSales:true},now});
+ const path=[...h.store.keys()].find(k=>k.startsWith('productionDomainJobs/')),ref=h.deps.db.doc(path);
+ await runProductionDomainJob({db:h.deps.db,ref,now,processOrder:()=>run(h.deps)});
+ assert.equal(h.order.status,'registered');assert.equal(h.order.connectionStatus,'connected');assert.equal(h.store.get(path).status,'complete');assert.equal(h.submits,1);
+ await queueProductionDomainPayment({db:h.deps.db,event,config:{testMode:false,liveDomainSales:true},now});await runProductionDomainJob({db:h.deps.db,ref,now,processOrder:()=>run(h.deps)});assert.equal(h.submits,1);
+});

@@ -1,7 +1,7 @@
 import {reviewedRegistration} from './domain-provisioning.js';
 import {sameDomainPrice,domainName} from './domain-registration.js';
 
-// Server-only staged worker. No deployed trigger or production secret is bound to it.
+// Server-only order processor. The scheduled caller is gated by both live-sales switches.
 // Every provider operation is injected by trusted orchestration, never browser input.
 export function assertProductionPayment(session,order,uid){
  const pi=session?.payment_intent,charge=pi?.latest_charge;
