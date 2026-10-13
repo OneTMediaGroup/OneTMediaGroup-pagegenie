@@ -61,3 +61,11 @@ Unknown, failed-paid and failed-refund writes create a private recovery request;
 - Full local suite passed 191 tests after the fix. Added a separate regression test for a discarded transaction claim; all 12 domain-payment tests pass including that new case. Live payments remain off. Production registrar fulfilment is not proven by this fictional-domain simulation.
 
 - Deployed the fix successfully to confirmDomainCheckout, registerDomain, domainRegistrationStatus, reviewDomainService and stripeWebhook. Marked the test recovery request handled with its full outcome note; a fresh owner queue read after deployment showed no open requests. Phone proof saved outside the repository as domain-recovery-owner-complete-phone.png.
+
+## Registrar expiry reconciliation — 13 October 2026
+
+The care worker now scans up to 100 records every 15 minutes, stops starting work after a 60-second budget, and resumes from the last processed record. Eligible real production registrations are read via Cloudflare Get Registration before reminders: exact domain, active status and valid expiry are required. Saved expiry and reported auto-renew update transactionally only if the order/expiry/lifecycle has not changed. Sandbox and synthetic fixtures are excluded. Reads time out after ten seconds; failures preserve the old date but mark it unverified and queue a deduplicated owner operations alert. No renewal, transfer, DNS or payment API is invoked.
+
+Reminder delivery also requires a verified record no older than eight hours and the exact queued expiry. A renewal invalidates old notices; stale or unavailable provider evidence suppresses the notice. Nonactive registrar states require operator investigation rather than guessing renewal/transfer status. Large inventories still require capacity monitoring; this is not a guarantee of reminder timing.
+
+325 tests pass, including renewal date changes, provider errors, wrong-domain responses, nonactive states, fixture isolation, concurrent updates/deletion and freshness boundaries. Read-only Cloudflare check of pagegenie-domain-test.com returned active, expiry 2027-10-12T19:15:21Z, auto-renew false. No domain changes or customer emails were initiated by that check. API contract: https://developers.cloudflare.com/api/resources/registrar/subresources/registrations/methods/get/ .

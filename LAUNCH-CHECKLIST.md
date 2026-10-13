@@ -1,6 +1,16 @@
 # PageGenie launch checklist
 
-Updated 12 October 2026. Live payments and real registrar purchases remain disabled. This is the consolidated status record; an implemented feature alone is not launch approval.
+Updated 13 October 2026. Live payments and real registrar purchases remain disabled. This is the consolidated status record; an implemented feature alone is not launch approval.
+
+## Current launch gates — 13 October (supersedes the historical priority list below)
+
+Completed since the older entries: production domain purchase/connection orchestration and .ca declaration validation; separate live Stripe prices, restricted checkout/notification/refund credentials; disabled live webhook destinations; tax classification/configuration review; production recovery safeguards and sandbox owner refund replay test. See DOMAIN-PRODUCTION-READINESS.md and billing records for exact scope. A real .ca purchase and live money movement have not been tested and are not authorised.
+
+Remaining:
+1. Verify the deployed registrar expiry reconciliation and its operational monitoring. Renewal/transfer **requests** work, but actual fulfilment remains owner-managed; document provider-side confirmation and customer approval before any paid action. Do not market those requests as automatic renewals/transfers.
+2. Final production cutover preflight: webhook destination activation/deployment order, credential permissions/expiry, customer portal/checkout branding and environment migration. Keep all live switches off until explicit approval. No real-money rehearsal is authorised; this remains a known untested boundary, not a reason to charge the owner.
+3. Owner business/policy review, including remaining retention decisions for billing/security/support/provider records. Configuration/tests are not legal or accounting approval.
+4. Final clean guest → free account → free publication acceptance and optional test upgrade on phone/desktop after the final release, then owner launch approval.
 
 ## Verified
 

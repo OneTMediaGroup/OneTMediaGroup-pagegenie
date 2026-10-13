@@ -1,3 +1,4 @@
+import {needsExpirySync,freshExpiry,syncDomainExpiry} from './domain-expiry-sync.js';
 import billingConfig from './billing-config.json' with {type:'json'};
 import {recoverProductionDomain} from './production-domain-recovery.js';
 import {productionRegistrar} from './domain-provisioning.js';
@@ -51,13 +52,19 @@ export const reviewDomainService=onCall({...options,timeoutSeconds:120,secrets:[
  await db.runTransaction(async tx=>{const current=(await tx.get(orderRef)).data();if(current?.orderId!==order.orderId||current.status!==order.status||current.refundId!==order.refundId)throw new HttpsError('aborted','Order changed during the check. Refresh before continuing.');if(result.patch)tx.update(orderRef,result.patch);tx.update(ref,{lastCheck:result.message,checkedAt:Date.now(),reviewer:r.auth.uid,updatedAt:Date.now()});});return {message:result.message};
 });
 // Page through orders in small batches; sandbox orders never generate expiry emails.
-export const checkDomainCare=onSchedule({schedule:'every 6 hours',region,maxInstances:1,timeoutSeconds:120,retryCount:2},async()=>{
+export const checkDomainCare=onSchedule({schedule:'every 15 minutes',region,maxInstances:1,timeoutSeconds:120,retryCount:2,secrets:[productionRegistrarKey]},async()=>{
  const db=getFirestore(),cursor=db.doc('operationsHealth/domainCare'),state=(await cursor.get()).data();let query=db.collectionGroup('domainOrders').orderBy(FieldPath.documentId()).limit(100);if(state?.after)query=query.startAfter(state.after);const page=await query.get();
- for(const doc of page.docs){const order=doc.data(),parts=doc.ref.path.split('/');if(parts.length!==4||parts[0]!=='users')continue;if(!order.orderId||!order.details?.domain)continue;const uid=parts[1],projectId=parts[3],life=(await db.doc('accountLifecycle/'+uid).get()).data();if(life&&life.status!=='active')continue;
-  const stage=reminderStage(order);if(stage!==null){const id=domainReminderId(uid,order,stage);try{await db.doc(`users/${uid}/domainNotices/${id}`).create({uid,projectId,orderId:order.orderId,domain:order.details.domain,expiresAt:order.expiresAt,daysRemaining:domainCare(order).daysRemaining,autoRenew:order.autoRenew===true,status:'queued',createdAt:Date.now()});}catch(e){if(e.code!==6&&e.code!=='already-exists')throw e;}}
+ const started=Date.now();let lastPath=state?.after||null,processed=0;
+ for(const doc of page.docs){if(Date.now()-started>60000)break;lastPath=doc.ref.path;processed++;let order=doc.data();const parts=doc.ref.path.split('/');if(parts.length!==4||parts[0]!=='users')continue;if(!order.orderId||!order.details?.domain)continue;const uid=parts[1],projectId=parts[3],life=(await db.doc('accountLifecycle/'+uid).get()).data();if(life&&life.status!=='active')continue;
+  if(needsExpirySync(order)){
+   const result=await syncDomainExpiry({db,ref:doc.ref,order,readRegistration:domain=>productionRegistrar({accountId:'73c71b31767e4449bb22322ce64c7ef8',token:productionRegistrarKey.value(),domain,operation:'get',fetcher:(url,options)=>fetch(url,{...options,signal:AbortSignal.timeout(10000)})})});
+   order=result.order;
+   if(!result.verified){if(!result.changed)await queueOperationAlert({category:'service-failure',service:'domain-expiry-sync'});continue;}
+  }
+  const stage=freshExpiry(order)?reminderStage(order):null;if(stage!==null){const id=domainReminderId(uid,order,stage);try{await db.doc(`users/${uid}/domainNotices/${id}`).create({uid,projectId,orderId:order.orderId,domain:order.details.domain,expiresAt:order.expiresAt,daysRemaining:domainCare(order).daysRemaining,autoRenew:order.autoRenew===true,status:'queued',createdAt:Date.now()});}catch(e){if(e.code!==6&&e.code!=='already-exists')throw e;}}
   if(domainCare(order).needsRecovery&&Date.now()-(order.paidAt||order.createdAt||Date.now())>15*60000)await queueDomainRequest({db,uid,projectId,order,kind:'recovery'});
  }
- await cursor.set({after:page.size===100?page.docs.at(-1).ref.path:null,checkedAt:Date.now(),checked:page.size});
+ await cursor.set({after:processed<page.size||page.size===100?lastPath:null,checkedAt:Date.now(),checked:processed});
 });
 export const queueDomainRecovery=onDocumentWritten({document:'users/{uid}/domainOrders/{projectId}',region,maxInstances:2,retry:true},async event=>{const order=event.data?.after.data();if(!needsImmediateDomainReview(order))return;try{await queueDomainRequest({db:getFirestore(),uid:event.params.uid,projectId:event.params.projectId,order,kind:'recovery'});}catch(e){if(e.code!=='failed-precondition')throw e;}});
 async function deliver(event,kind){
@@ -65,7 +72,7 @@ async function deliver(event,kind){
  if(Date.now()-Date.parse(event.time)>20*3600000){await event.data.ref.update({notificationFailedAt:FieldValue.serverTimestamp()});await queueOperationAlert({category:'delivery',service:'domain-care'});return;}
  const db=getFirestore(),life=(await db.doc('accountLifecycle/'+item.uid).get()).data();if(life&&life.status!=='active')return;
  const order=(await db.doc(`users/${item.uid}/domainOrders/${item.projectId}`).get()).data();if(order?.orderId!==item.orderId)return;
- let body;if(kind==='expiry'){if(order.environment!=='production'||order.status!=='registered'||order.paymentStatus!=='paid'||order.expiresAt!==item.expiresAt)return;const user=await getAuth().getUser(item.uid);if(!user.email||!user.emailVerified||user.disabled)return;body=expiryMessage({...item,email:user.email,testFixture:order.testFixture===true});}
+ let body;if(kind==='expiry'){if(order.environment!=='production'||order.status!=='registered'||order.paymentStatus!=='paid'||order.expiresAt!==item.expiresAt||!freshExpiry(order))return;const user=await getAuth().getUser(item.uid);if(!user.email||!user.emailVerified||user.disabled)return;body=expiryMessage({...item,email:user.email,testFixture:order.testFixture===true});}
  else{const user=await getAuth().getUser(item.uid);body={from:'PageGenie <contact@pagegenie.ca>',to:['gotyourschase@hotmail.com'],reply_to:'support@pagegenie.ca',subject:'PageGenie: Domain '+item.kind+' needs review',text:`Request: ${item.kind}\nDomain: ${item.domain}\nCustomer: ${user.email||item.uid}\nEnvironment: ${item.environment}\n\nOpen Domain care in your private owner workspace:\nhttps://pagegenie.ca/owner.html\n\nNo purchase, renewal, transfer or new refund is authorised by this notification. Verify provider records, ownership, current pricing and customer approval before acting.`};}
  const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:'Bearer '+mail.value(),'Content-Type':'application/json','Idempotency-Key':'pagegenie-domain-'+kind+'-'+event.params.id},body:JSON.stringify(body),signal:AbortSignal.timeout(12000)});if(!response.ok)throw Error('Domain email delivery failed');await event.data.ref.update({notificationSentAt:FieldValue.serverTimestamp()});
 }
