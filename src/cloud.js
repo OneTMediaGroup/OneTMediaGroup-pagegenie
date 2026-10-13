@@ -1,3 +1,4 @@
+import {wantsVisualChange} from '../functions/design-treatment.js';
 import {installSidebarGenie} from './sidebar-genie.js';
 import {installGenieFriend} from './genie-friend.js';
 import {installGuidance} from './genie-guidance.js';
@@ -125,16 +126,17 @@ const designHistory=installDesignVersions({
   generatingCustom=true;
   try{const current=getComposition(),layout=current?.html.match(/layout-([a-z]+)/)?.[1]||'restaurant';
    const request={business:el('business').value,location:el('location').value,description:el('description').value,services:el('services').value,tone:el('tone').value,goal:guidance.get(),command:mode==='fresh'?'Create a fresh copy direction for this same business. Keep the '+layout+' layout. Use a punchy headline and specific, natural language. Keep one clear fictional-demo disclosure if applicable; do not repeat it in every heading.':command.slice(0,240)};
-   if(mode==='refine')request.current=compositionText();
+   if(mode==='refine'){request.current=compositionText();request.visual=wantsVisualChange(command);}
    const result=(await httpsCallable(functions,'generateWebsite',{timeout:240000})(request)).data;
    result.composition=mode==='refine'?refinedComposition(current,result,window):keepUploadedHero(current,result.composition,window);
-   return result;
+   lastGenieTreatment=result.visualApplied?result.design.treatment:null;return result;
   }finally{generatingCustom=false;}
  },
  saveProject:async()=>{if(user)await saveCloudProject(currentId(),payload());},saveLocal:()=>saveDraft(),openAccount:()=>openAccount(),notify:toast,layoutSelect,cinematic:{status:async()=>{if(!user)return {paid:false,remaining:3};await user.reload();await user.getIdToken(true);const id=currentId();await saveCloudProject(id,payload());return (await httpsCallable(functions,'cinematicDesign')({projectId:id,action:'status'})).data;},generate:async(direction,requestId)=>(await httpsCallable(functions,'cinematicDesign',{timeout:240000})({projectId,action:'generate',direction,requestId})).data,upgrade:()=>go(3)}
 });
 window.refreshDesignVersions=()=>designHistory.refresh();
-const sidebarGenie=installSidebarGenie({manage:()=>designHistory.manage(),apply:async command=>{await designHistory.run('refine',command);return el('versionStatus').textContent;}});
+let lastGenieTreatment=null;
+const sidebarGenie=installSidebarGenie({manage:()=>designHistory.manage(),apply:async command=>{lastGenieTreatment=null;await designHistory.run('refine',command);const message=el('versionStatus').textContent;const t=lastGenieTreatment;return t&&message.startsWith('Design saved.')?message+' Updated: '+t.font+' font · '+t.spacing+' spacing · '+t.palette+' colours · '+({split:'split',reverse:'image-first',stacked:'stacked'}[t.hero])+' hero.':message;}});
 askAI=sidebarGenie.run;
 installGenieFriend({readSite:()=>{const page=new DOMParser().parseFromString(getComposition()?.html||el('site').outerHTML,'text/html');return {headline:page.querySelector('h1,h2')?.textContent||'',description:page.querySelector('p')?.textContent||'',hasContact:!!page.querySelector('a[href^="mailto:"],a[href^="tel:"]'),goal:guidance.get()};},apply:async command=>{await designHistory.run('refine',command);return el('versionStatus').textContent;},openContact:()=>contacts.open()});
 

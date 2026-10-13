@@ -16,7 +16,7 @@ export const generateWebsite=onCall({region:'northamerica-northeast1',secrets:[O
  await reserveAiAttempt({db:getFirestore(),uid:request.auth.uid,kind:'website'});
  const day=new Date().toISOString().slice(0,10),ref=getFirestore().doc('generationUsage/'+request.auth.uid+'_'+day);
  await getFirestore().runTransaction(async tx=>{const snapshot=await tx.get(ref),count=snapshot.data()?.count||0;if(count>=10)throw new HttpsError('resource-exhausted','Daily generation allowance reached.');tx.set(ref,{count:count+1,updatedAt:FieldValue.serverTimestamp()});});
- try{return await generateCopy({key:OPENAI_API_KEY.value(),model:OPENAI_MODEL.value(),data});}catch(error){if(error instanceof HttpsError)throw error;throw new HttpsError('unavailable','AI could not complete your website. Please try again.');}
+ try{return await generateCopy({key:OPENAI_API_KEY.value(),model:data.visual?'gpt-6.1-sol':OPENAI_MODEL.value(),data});}catch(error){if(error instanceof HttpsError)throw error;throw new HttpsError('unavailable','AI could not complete your website. Please try again.');}
 });
 
 // Logo history and allowances are written only by trusted server functions.
