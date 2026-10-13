@@ -20,3 +20,18 @@ test('Logo history loads in bounded pages and keeps all previous versions availa
 test('Choosing refinement preserves the collection, exposes its allowance and never generates automatically',async()=>{const f=fixture();f.setUser({uid:'owner',emailVerified:true});await f.ui.refresh();const refine=[...f.w.document.querySelectorAll('.logo-version button')].find(b=>b.textContent==='Refine this logo');refine.click();assert.match(f.w.document.getElementById('logoRefinement').textContent,/one included retry/);assert.equal(f.w.document.getElementById('generateBrandLogo').textContent,'✧ Refine this logo');assert.equal(f.w.document.querySelectorAll('.logo-version').length,1);assert.equal(f.w.document.activeElement.id,'logoDirection');f.w.document.getElementById('logoNewConcept').click();assert.equal(f.w.document.getElementById('generateBrandLogo').textContent,'✧ Try another concept');f.w.close();});
 
 test('Exhausted logo allowance disables refinement as well as new concepts',async()=>{const f=fixture();f.w.fixtureLogoGenerated=3;f.setUser({uid:'owner',emailVerified:true});await f.ui.refresh();assert.equal(f.w.document.getElementById('generateBrandLogo').disabled,true);assert.equal([...f.w.document.querySelectorAll('.logo-version button')].find(b=>b.textContent==='Refine this logo').disabled,true);f.w.close();});
+
+test('Logo continuation uses the current policy-gated publisher, including dashboard entry, and ignores double taps',async()=>{
+ const f=fixture();f.setUser({uid:'owner',emailVerified:true});let calls=0,release;
+ f.w.finishLogoPublishing=()=>{calls++;return new Promise(resolve=>{release=resolve})};
+ // Dashboard opens the logo screen directly, without installing a finish callback.
+ f.w.go('logo');
+ const button=f.w.document.getElementById('finishLogo');const pending=button.onclick();
+ await new Promise(resolve=>setImmediate(resolve));assert.equal(calls,1);assert.equal(button.disabled,true);
+ await button.onclick();assert.equal(calls,1);release();await pending;
+ assert.equal(button.disabled,false);assert.equal(button.textContent,'Continue to publishing →');
+ // The ordinary logo entry also resolves the publisher at click time.
+ f.w.publishCloud();f.w.finishLogoPublishing=async()=>{calls++};await button.onclick();assert.equal(calls,2);
+ f.w.finishLogoPublishing=async()=>{throw Error('offline')};await button.onclick();
+ assert.match(f.w.document.getElementById('logoStatus').textContent,/please try again/);assert.equal(button.disabled,false);
+});
