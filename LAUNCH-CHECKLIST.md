@@ -156,3 +156,4 @@ See STRIPE-CUTOVER-REVIEW.md for verified prices, portal, disabled destinations/
 ## Publish-order polish — 13 October 2026
 - Missing business contact details now open before policy acceptance. Save & continue advances directly to the policy prompt, then publication; blank details and cancellation stop the flow. Existing details skip the form. Repeated taps cannot create duplicate publication dialogs.
 - 331 tests pass, including contact-save → one policy acceptance → publication and cancellation coverage; production bundle rebuilt. Checkout and money-movement configuration unchanged and off.
+- Live phone-sized Chrome follow-up completed after reconnect: Cedar Trail's missing-details form appeared first; Save & continue opened exactly one policy agreement; accepting led directly to free publication of the same project eca26283-7f51-40f0-8288-59d82f4f128c. No repeated agreement or checkout. Temporary viewport reset; sales/processing/refund switches remain false.
