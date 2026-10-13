@@ -10,4 +10,4 @@ Validation: `scripts/test-project-save.mjs` runs only with the isolated Firestor
 
 Rollout: deploy saveProject first, publish the frontend next, then enforce Firestore rules after confirming the new frontend is served. A stale open tab must refresh to use protected saving; local drafts are preserved.
 
-Remaining: Firebase Auth signup abuse and allowed-read volume need separate evaluation. This is not a claim of complete abuse prevention. Live Stripe payments stay off.
+Follow-up: Firebase Auth signup attestation rejection and database read protection are now verified; see DATABASE-READ-PROTECTION.md. Attested clients can still repeat permitted reads, so this is not complete abuse prevention or a hard cost cap. Final security/content/accessibility acceptance remains outstanding. Live Stripe payments stay off.

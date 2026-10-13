@@ -8,7 +8,7 @@ Live payments and registrar purchases remain disabled. App Check is an additiona
 - Callable enforcement in the shared active-account wrapper; verification/reset email, privacy and recovery callables explicitly enforce it too.
 - Public visitor analytics and domain resolution intentionally do not require app attestation. Public hosting and Stripe signed webhooks are not browser-callable endpoints and remain accessible through their existing controls.
 - Authenticated wrapper requests limited atomically to 120 per account per minute across endpoints. Counters expire after two days. Existing tighter AI, email, reports, domain and checkout limits remain.
-- Firebase Authentication App Check enforcement enabled 12 October 2026. Direct Firestore App Check enforcement remains separate; direct draft writes are denied by rules and the guarded save endpoint applies storage limits. Ownership rules, verified-email AI gates and provider authentication limits remain necessary. App Check does not replace authentication or policy enforcement.
+- Firebase Authentication App Check enforcement enabled 12 October 2026. Firestore App Check is also ENFORCED, verified 12 October 2026 with live missing-token and forged-token rejection (HTTP 403). Bounded private collection queries and logo pagination are deployed; see DATABASE-READ-PROTECTION.md. Direct draft writes are denied by rules and the guarded save endpoint applies storage limits. Ownership rules, verified-email AI gates and provider authentication limits remain necessary. App Check does not replace authentication or policy enforcement.
 
 ## Automatic alerts
 
