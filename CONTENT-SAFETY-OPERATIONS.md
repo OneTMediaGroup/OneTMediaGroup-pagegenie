@@ -51,3 +51,8 @@ Consolidated launch status: LAUNCH-CHECKLIST.md. AI generation request ceilings 
 The standard moderation endpoint does not cover hate/harassment for image-only input (https://developers.openai.com/api/docs/guides/moderation). Each retained image now also receives a strict allow/block/review vision policy assessment using gpt-4.1-mini with storage disabled. A review result requests a changed image or human support; it does not publish automatically. Provider failures/refusals/malformed responses block the new operation. This adds a paid vision request per image; request-count ceilings are not a dollar-cost guarantee.
 
 34 live synthetic/layout cases and 200 local tests passed; see LAUNCH-CHECKLIST.md and content-safety-acceptance.json for finite scope and rate-limit interruptions. No harmful fixture was published. Continue human review and realistic calibration; these checks do not guarantee detection of every harmful image, language or future external stream.
+
+
+## Case retention — 13 October 2026
+
+Apply the monthly owner review in PRIVACY-REQUEST-PROCEDURE.md: reports, decisions and appeals are retained 24 months after final resolution; routine support correspondence 12 months after closure. Open appeals and documented legal/safety holds are protected and reviewed quarterly. A reviewed report is not necessarily resolved. Do not delete active `siteRestrictions` or restore a website as a side effect of disposing of an old report. Email copies and attachments are included. This is a manual operating procedure, not a newly enabled database purge.

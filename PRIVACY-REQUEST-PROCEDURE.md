@@ -50,3 +50,32 @@ Implementation: `functions/account-lifecycle.js`, `functions/active-call.js`, `s
 Validation: `npm test` and `npm run test:recovery` (requires Java 21 and Firebase CLI). The integration runner refuses to execute without both emulator environment variables, uses project `demo-pagegenie-recovery`, and advances only an injected service clock in the isolated test. No production endpoint accepts a custom deadline or clock.
 
 Release verification — 12 October 2026: recovery and cleanup services ACTIVE; hourly scheduler ENABLED; accountLifecycle index READY; GitHub Pages release 126aad5 succeeded; live signed-in status control verified without scheduling deletion; anonymous recovery call returned 401; Northline HTTPS returned 200. All 127 automated tests passed. Live payments remain disabled.
+
+
+## Retention schedule — effective 13 October 2026
+
+This schedule supersedes earlier open retention decisions for support and moderation. One T Media Group owns the monthly review; no automated support/moderation purge or inbox cleanup is claimed or enabled by this policy release.
+
+| Record | Default period and trigger |
+| --- | --- |
+| Routine support email, attachments and completed privacy requests | 12 months after documented case closure |
+| Content reports, moderation decisions and appeals | 24 months after final case resolution, including appeals |
+| Open cases | Keep necessary records while resolving; review quarterly for progress and minimisation |
+| Continuing site/account restrictions | Keep minimum enforcement record while restriction applies; review quarterly; never delete a restriction merely because a related report expires |
+| Required billing/tax records | Generally six years after end of relevant tax year; apply longer statutory requirements or documented holds |
+| Personal-information breach records, where PIPEDA applies | At least 24 months from determination that breach occurred; retain longer if another obligation applies |
+
+Existing guest/account deletion, 30-day operational-alert expiry and seven-day database backup schedules are unchanged. Minimal deletion markers must remain while needed to prevent resurrection from retained backups/archives; review that need quarterly. Do not apply this case schedule blindly to account lifecycle, domain ownership, payments, restriction or deletion-marker records.
+
+### Monthly owner procedure
+
+1. Review the support inbox (including forwarded copies in gotyourschase@hotmail.com, sent mail, folders and attachments), `privacyRequests`, `contentReports`, `contentAudit`, and related appeal correspondence. Do not export full personal details into a retention spreadsheet.
+2. Establish final closure date from the case outcome. `privacyRequests.reviewedAt` can be used only for a genuinely completed case. `contentReports.reviewedAt` and `contentAudit.createdAt` alone do not prove final resolution: check restrictions and pending appeals. If closure is unknown, investigate and document it; do not guess or delete by creation date.
+3. Before disposal, check legal, billing, domain, complaint, investigation and safety holds. Document the minimum record scope, reason, responsible owner and next review date (within three months). A hold is not permission to retain unrelated content indefinitely. On release, apply the original retention deadline; if already overdue, dispose during this review.
+4. Delete or irreversibly anonymise eligible records and linked unnecessary attachments/copies using a reviewed, narrowly scoped action. Preserve active restrictions and all unrelated customer sites/logos. Remove email trash copies where supported. No current records were deleted as part of adopting this schedule.
+5. Record completion date, categories/counts removed, reviewer and next monthly review; retain no report text, email bodies or credentials in the disposal log. Restricted backup copies age out within seven additional days. Keep a minimal disposal manifest through that backup window so a restore cannot reintroduce removed records; apply it before recovered data becomes accessible.
+6. Confirm deletion capabilities and residual retention with relevant providers. Do not promise to erase records a provider holds independently for legal obligations. The inbox review is manual; no recurring automation has been created.
+
+Reference: [OPC retention guidance](https://www.priv.gc.ca/en/privacy-topics/privacy-for-businesses/appropriate-handling-of-personal-information/gd_rd_201406/), [OPC breach records](https://www.priv.gc.ca/en/privacy-topics/privacy-for-businesses/privacy-breaches-at-your-business/breach_101/breach_records/), [CRA recordkeeping](https://www.canada.ca/en/revenue-agency/services/forms-publications/publications/rc188/keeping-records.html).
+
+Owner will arrange tax filing/remittance. This does not verify that filing is configured or transfer responsibility to Stripe. Checkout and real charges remain disabled.
