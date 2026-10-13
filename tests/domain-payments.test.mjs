@@ -31,3 +31,11 @@ test('A retried transaction cannot retain a discarded registration claim from it
  await processDomainPayment(order.sessionId,'owner',order.projectId,h.deps);
  assert.equal(h.registrations,0);assert.equal(h.refunds,0);assert.equal(h.current.status,'submitting');
 });
+
+// Production must not inherit an unrelated account-default category or omit fee tax.
+test('production domain checkout classifies both charges and requires automatic tax and billing address',()=>{
+ const p=domainCheckoutParameters({...order,environment:'production'},'owner','qa@example.com');
+ assert.deepEqual(p.automatic_tax,{enabled:true});assert.equal(p.billing_address_collection,'required');
+ assert.deepEqual(p.line_items.map(x=>[x.price_data.unit_amount,x.price_data.tax_behavior,x.price_data.product_data.tax_code]),[[1464,'exclusive','txcd_10000000'],[200,'exclusive','txcd_10000000']]);
+ const sandbox=domainCheckoutParameters(order,'owner','qa@example.com');assert.equal(sandbox.automatic_tax,undefined);assert.ok(sandbox.line_items.every(x=>!x.price_data.product_data.tax_code));
+});

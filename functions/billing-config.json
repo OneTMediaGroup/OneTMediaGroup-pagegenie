@@ -31,14 +31,14 @@
   "productionDomains": {
     "stripeAccountId": "acct_1Ti3hv1uRlTVrdir",
     "taxMode": "stripe-automatic",
-    "taxSettingsReviewed": false,
+    "taxSettingsReviewed": true,
     "stripeSecret": "STRIPE_LIVE_SECRET_KEY",
     "webhookSecret": "STRIPE_LIVE_WEBHOOK_SECRET"
   },
   "livePlanNotifications": false,
   "livePlanSales": false,
   "productionPlans": {
-    "taxSettingsReviewed": false,
+    "taxSettingsReviewed": true,
     "portalConfiguration": "bpc_1UQ9Z61uRlTVrdirfy9bovzO",
     "plans": {
       "starter": {
