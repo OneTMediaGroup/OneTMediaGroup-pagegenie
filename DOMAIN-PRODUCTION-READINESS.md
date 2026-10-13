@@ -177,3 +177,7 @@ Created a fresh disposable northline-refund-retest.example order and completed a
 ## Production billing transition — 13 October (current)
 
 The approved 14 test billing records are archived and migrated to free production state, with sites/logos/examples preserved. Production configuration and matching credential bindings are deployed and verified across 27 services, including domain review/search/confirmation and the production domain webhook. All 328 tests pass. All live sales/processing/notification/refund switches remain false, both notification endpoints return disabled 503 responses, and no real checkout or purchase was created. This supersedes earlier migration and credential-deployment pending notes. Notification activation and final acceptance still require completion before sales approval.
+
+## Notification-only activation — 13 October (current)
+
+Live domain notification intake now has its own liveDomainNotifications switch, enabled alongside plan notifications. Both Stripe destinations are active with their original 2/15 event sets. Actual Stripe product-update delivery returned 200 to each, after which the temporary product.updated event selection was removed. Domain fulfilment, both checkout switches and refunds remain disabled. No charge or registration occurred. This completes transport/signature verification, not a live settlement or .ca purchase rehearsal.

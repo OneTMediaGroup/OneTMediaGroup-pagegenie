@@ -138,3 +138,9 @@ See STRIPE-CUTOVER-REVIEW.md for verified prices, portal, disabled destinations/
 - 56 site/publication/domain records and 33 logo-history records preserved; all five homepage examples and both Northline custom domains return 200.
 - Production mode and matching credentials deployed to 27 services, all verified ACTIVE. All 328 tests pass. Sales, live notification processing, domain processing and refunds remain disabled. No real-money operation or purchase.
 - Remaining cutover work: explicitly approved notification activation and delivery verification, final operations/policy review and customer acceptance, followed by explicit sales approval.
+
+## Live notification delivery — 13 October (current)
+
+- Both existing Stripe live destinations activated and independently show Delivered / HTTP 200 for a genuine harmless product-update event. Temporary product subscription removed; permanent counts restored to 15 plan events and 2 domain events.
+- Plan/domain notification receivers enabled; domain fulfilment remains independently paused. Checkout, refunds and domain purchases remain off. No real charge or customer purchase.
+- 330 tests pass; deployed unsigned requests rejected with 400. Notification transport gate is complete; real settlement remains intentionally untested. Final operations/policy/customer acceptance and separate sales/fulfilment approval remain.

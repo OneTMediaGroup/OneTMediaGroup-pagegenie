@@ -33,9 +33,9 @@ test('Cloudflare context domain response is recognised; conflicting identities a
 test('Payment event to durable job to registration to connection completes once',async()=>{
  const {queueProductionDomainPayment,runProductionDomainJob}=await import('../functions/domain-payment-handoff.js');const h=harness();
  const event={livemode:true,type:'checkout.session.completed',data:{object:h.payment}};
- await queueProductionDomainPayment({db:h.deps.db,event,config:{testMode:false,liveDomainSales:true,liveDomainProcessing:true},now});
+ await queueProductionDomainPayment({db:h.deps.db,event,config:{testMode:false,liveDomainSales:true,liveDomainProcessing:true,liveDomainNotifications:true},now});
  const path=[...h.store.keys()].find(k=>k.startsWith('productionDomainJobs/')),ref=h.deps.db.doc(path);
  await runProductionDomainJob({db:h.deps.db,ref,now,processOrder:()=>run(h.deps)});
  assert.equal(h.order.status,'registered');assert.equal(h.order.connectionStatus,'connected');assert.equal(h.store.get(path).status,'complete');assert.equal(h.submits,1);
- await queueProductionDomainPayment({db:h.deps.db,event,config:{testMode:false,liveDomainSales:true,liveDomainProcessing:true},now});await runProductionDomainJob({db:h.deps.db,ref,now,processOrder:()=>run(h.deps)});assert.equal(h.submits,1);
+ await queueProductionDomainPayment({db:h.deps.db,event,config:{testMode:false,liveDomainSales:true,liveDomainProcessing:true,liveDomainNotifications:true},now});await runProductionDomainJob({db:h.deps.db,ref,now,processOrder:()=>run(h.deps)});assert.equal(h.submits,1);
 });

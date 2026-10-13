@@ -2,7 +2,7 @@
 
 ## Current verified state
 
-No live sale, refund, domain purchase or payment link was created. The approved 14-record billing migration is complete. testMode=false; livePlanSales, liveDomainSales, livePlanNotifications, liveDomainProcessing and liveDomainRefunds=false.
+No live sale, refund, domain purchase or payment link was created. The approved 14-record billing migration is complete. testMode=false; livePlanNotifications=true and liveDomainNotifications=true. livePlanSales, liveDomainSales, liveDomainProcessing and liveDomainRefunds=false.
 
 Read-only Stripe checks verified active live CAD prices: Starter 900 cents monthly, Complete 1900 cents monthly, HTML 4900 cents once; correct product IDs and exclusive tax. Dedicated live portal is active with PageGenie return URL, invoices/payment-method updates and period-end cancellation; public portal login disabled. No payable live Checkout Session was created, so its rendered checkout remains unverified.
 
@@ -14,7 +14,7 @@ Fifteen deployed billing/access/recovery functions were ACTIVE. Before the produ
 
 Historical pre-cleanup billing inventory: 18 records; 9 eligible test records, 8 held (7 subscriptions need ending and 1 unresolved checkout), 1 non-test excluded. This snapshot precedes authorised disposable synthetic-account cleanup. Named testers/owner/example accounts require deliberate per-account handling; never bulk-delete them to remove a launch blocker.
 
-## Activation sequence — steps 1–2 completed; later activation remains unauthorised
+## Activation sequence — billing migration and notification activation completed; sales remain unauthorised
 
 1. Approved test subscriptions/checkouts are now closed (see cleanup below). Run a fresh migration dry-run then exact per-record migration, preserving sites/logos/domains and archives. The 14 eligible records have now been migrated, with zero test billing records remaining.
 2. Production mode is now selected with sales/refunds OFF; deployment verification is recorded below. Deploy all configuration consumers as one reviewed release: createCheckout, billingStatus, createBillingPortal, downloadWebsite, promotionalKit, publishWebsite, websiteAnalytics, saveDomainSettings, cinematicDesign; customerWebsite, recordSiteEvent; connectDomainAfterRegistration, connectDomainAfterPlanChange, connectDomainAfterPublication, domainConnectionStatus, resolveDomain; createDomainCheckout, registerDomain, domainRegistrationStatus, stripeDomainWebhook, fulfilProductionDomains, automaticDomainConnections, reviewDomainService. Verify selected secrets and cached-access isolation. Keep test stripeWebhook isolated.
@@ -49,3 +49,13 @@ The 56 project/publication/domain snapshot records were identical before and aft
 Set testMode=false and retained livePlanSales=false, liveDomainSales=false, livePlanNotifications=false, liveDomainProcessing=false and liveDomainRefunds=false. All 328 automated tests passed; updated environment-dependent paid fixtures to explicit production receipts. Deployed 27 affected services, including domain search/review and checkout confirmation, and independently verified all ACTIVE. Plan consumers bind STRIPE_LIVE_PLAN_CHECKOUT_KEY; the domain webhook binds STRIPE_LIVE_SECRET_KEY and STRIPE_LIVE_WEBHOOK_SECRET; live plan notifications retain their dedicated read/signing credentials. Refund write access remains unbound.
 
 Both notification endpoints return HTTP 503 with their explicit disabled messages. Stripe destinations were not enabled. No checkout session, charge, refund or registration was created. Existing test webhook remains isolated and refuses migrated production billing records. Next: separately approve notification activation/delivery verification, complete final operations/customer acceptance, then explicit sales approval. Free publishing remains available; test paid entitlements were intentionally removed.
+
+## Live notification activation and delivery — 13 October
+
+Owner authorised notification activation only, with checkout off and no real charges. Added independent liveDomainNotifications gate so receiving/queueing signed events does not activate the domain fulfilment worker. Domain sales now require notifications AND processing readiness; both sales and processing remain false. Plan notifications enabled; sales/refunds remain false. Deployed eight affected functions successfully; 330 tests passed, including notifications while fulfilment is paused and sales refusal without notifications.
+
+Activated the existing PageGenie Plan Payments — Live and PageGenie Domain Payments — Live Stripe destinations. With no historical live checkout event available, temporarily subscribed each to product.updated and re-saved the existing PageGenie HTML product unchanged. Stripe itself delivered the resulting live events to both endpoints with HTTP 200. Confirmed event evt_1UQB1n1uRlTVrdirEOfmzIMM marked Delivered at both destinations. No customer, checkout, charge, refund, domain registration or paid entitlement was created. Product name/description/tax code/default price remained unchanged.
+
+Removed product.updated from both destinations after verification; final active subscriptions are exactly the original 15 plan events and 2 domain checkout events. Updated descriptions to reflect the disabled sales state. Unsigned probes to both deployed endpoints return HTTP 400 Invalid signature. Verified all 27 release functions ACTIVE, 14 migrated billing records preserved and all 33 logo records unchanged.
+
+This verifies genuine Stripe-to-production transport and signature validation without money movement. Paid lifecycle logic remains covered by the prior Stripe test-mode rehearsal and automated tests; actual live settlement and .ca purchase remain untested by owner choice. Evidence screenshots: verification/stripe-plan-delivered.png and verification/stripe-domain-delivered.png. Next gates are final operations/policy/customer acceptance and separate fulfilment/sales approval.

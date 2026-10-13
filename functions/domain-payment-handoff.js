@@ -1,10 +1,10 @@
 import {createHash} from 'node:crypto';
-import {liveDomainProcessingEnabled} from './domain-launch-gates.js';
-export {liveDomainSalesEnabled,liveDomainProcessingEnabled} from './domain-launch-gates.js';
+import {liveDomainNotificationsEnabled} from './domain-launch-gates.js';
+export {liveDomainSalesEnabled,liveDomainProcessingEnabled,liveDomainNotificationsEnabled} from './domain-launch-gates.js';
 // Called only after Stripe signature verification. Fetching the session and verifying
 // its payment is still mandatory in the fulfilment worker; event metadata is not proof.
 export async function queueProductionDomainPayment({db,event,config,now=Date.now()}){
- if(!liveDomainProcessingEnabled(config))throw Error('Live domain processing is disabled.');
+ if(!liveDomainNotificationsEnabled(config))throw Error('Live domain notifications are disabled.');
  const object=event.data?.object;
  if(event.livemode!==true||object?.livemode!==true)throw Error('Production handoff requires a live event.');
  if(!['checkout.session.completed','checkout.session.async_payment_succeeded'].includes(event.type)||object.metadata?.app!=='pagegenie'||object.metadata.kind!=='domain'||object.payment_status!=='paid')return false;
