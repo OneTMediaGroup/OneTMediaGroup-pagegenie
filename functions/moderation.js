@@ -1,19 +1,21 @@
 import sharp from 'sharp';
+import {reviewPolicyImage,IMAGE_REVIEW_MODEL} from './image-policy.js';
 import {cleanComposition} from './shared/composition-safety.js';
 import {HttpsError} from 'firebase-functions/v2/https';
 import {defineSecret} from 'firebase-functions/params';
 import {JSDOM} from 'jsdom';
 export const moderationKey=defineSecret('OPENAI_API_KEY');
 export const POLICY_VERSION='2026-10-11';
-export async function moderateContent({key,text='',images=[],fetcher=fetch}) {
+export async function moderateContent({key,text='',images=[],fetcher=fetch,imageReviewer=reviewPolicyImage}) {
  if(text.length>180000||images.length>24)throw new HttpsError('failed-precondition','Reduce the content or number of images before publishing.');
  const inputs=[...(text.trim()?[{type:'text',text}]:[]),...images.map(url=>({type:'image_url',image_url:{url}}))];
  if(!inputs.length)throw new HttpsError('failed-precondition','Add content before continuing.');
  // Each image is checked separately: a large gallery cannot dilute a harmful image.
  for(const input of inputs){let response,json;try{response=await fetcher('https://api.openai.com/v1/moderations',{method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},signal:AbortSignal.timeout(30000),body:JSON.stringify({model:'omni-moderation-latest',input:[input]})});if(!response.ok)throw Error();json=await response.json();if(!json.results?.length||json.results.some(r=>typeof r.flagged!=='boolean'))throw Error();}catch{throw new HttpsError('unavailable','The content safety check is temporarily unavailable. Nothing new has been published. Please try again shortly.');}
  if(json.results.some(r=>r.flagged))throw new HttpsError('failed-precondition','This content needs changes under our Content Policy. Remove harmful or abusive material and try again. If this seems wrong, contact support@pagegenie.ca for review.');
+ if(input.type==='image_url')await imageReviewer({key,image:input.image_url.url,fetcher});
  }
- return {checkedAt:new Date().toISOString(),policyVersion:POLICY_VERSION,model:'omni-moderation-latest'};
+ return {imageReviewModel:images.length?IMAGE_REVIEW_MODEL:null,checkedAt:new Date().toISOString(),policyVersion:POLICY_VERSION,model:'omni-moderation-latest'};
 }
 export function draftContent(draft){
  const win=new JSDOM(draft.composition?.html||'').window;

@@ -4,7 +4,9 @@ import {build} from 'esbuild';
 import {createHash} from 'node:crypto';
 import {readFile,writeFile} from 'node:fs/promises';
 await build({entryPoints:['src/cloud.js'],bundle:true,format:'esm',minify:true,outfile:'assets/cloud.js',target:['es2022'],legalComments:'eof'});
-let html=await readFile('PageGenie.html','utf8');
+const accessibilityCSS=await readFile('src/accessibility.css','utf8');
+const accessible=html=>html.replace('</head>','<style data-accessibility>'+accessibilityCSS+'</style></head>');
+let html=accessible(await readFile('PageGenie.html','utf8'));
 html=html.replace('<meta name="robots" content="noindex, follow">','').replace('</head>',homeSEO+'</head>');
 html=html.replace('</head>',`<script>if(new URLSearchParams(location.search).has('domain')||new URLSearchParams(location.search).has('site'))document.documentElement.dataset.publicOpening='true';</script><style>html[data-public-opening] main,html[data-public-opening] header{visibility:hidden}</style></head>`);
 html=html.replace('</head>', '<script>if(new URLSearchParams(location.search).has("review"))location.replace("/owner.html");</script></head>');
@@ -39,11 +41,11 @@ html=customer.serialize();
 await writeFile('index.html',html);
 await build({entryPoints:['src/auth-action.js'],bundle:true,format:'esm',minify:true,outfile:'assets/auth-action.js',target:['es2022'],legalComments:'eof'});
 const actionVersion=createHash('sha256').update(await readFile('assets/auth-action.js')).digest('hex').slice(0,12);
-const actionPage=(await readFile('src/auth-action.html','utf8')).replace('./assets/auth-action.js',`./assets/auth-action.js?v=${actionVersion}`);
+const actionPage=accessible(await readFile('src/auth-action.html','utf8')).replace('./assets/auth-action.js',`./assets/auth-action.js?v=${actionVersion}`);
 await writeFile('auth.html',actionPage);
 
 await writeSEOFiles();
 
 await build({entryPoints:['src/owner.js'],bundle:true,format:'esm',minify:true,outfile:'assets/owner.js',target:['es2022'],legalComments:'eof'});
 const ownerVersion=createHash('sha256').update(await readFile('assets/owner.js')).digest('hex').slice(0,12);
-await writeFile('owner.html',(await readFile('src/owner.html','utf8')).replace('./assets/owner.js',`./assets/owner.js?v=${ownerVersion}`));
+await writeFile('owner.html',accessible(await readFile('src/owner.html','utf8')).replace('./assets/owner.js',`./assets/owner.js?v=${ownerVersion}`));

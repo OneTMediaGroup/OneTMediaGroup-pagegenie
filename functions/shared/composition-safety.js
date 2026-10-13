@@ -21,8 +21,9 @@ export function cleanComposition(input,win){
  doc.querySelectorAll('section').forEach((node,i)=>{if(!node.id)node.id='pg-section-'+i;});
  if(!doc.querySelector('h1')||!doc.querySelector('section'))throw Error('The custom website is incomplete');
  const guard='/* PageGenie responsive guard */nav ul{flex-wrap:wrap!important;min-width:0;max-width:100%}';
+ const accessibleCSS='/* PageGenie accessibility guard */a:focus-visible{outline:3px solid #1454b8!important;outline-offset:4px!important;box-shadow:0 0 0 7px #fff!important}a{scroll-margin:20px}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}';
  const responsiveCSS=css.replace(/(\d+(?:\.\d+)?)(?:d|s|l)?vh\b/gi,(_,n)=>Math.round(Number(n)*8)+'px');
- return {concept:String(input.concept||'Custom website').slice(0,600),html:doc.body.innerHTML,css:responsiveCSS+(responsiveCSS.includes('/* PageGenie responsive guard */')?'':'\n'+guard)};
+ return {concept:String(input.concept||'Custom website').slice(0,600),html:doc.body.innerHTML,css:responsiveCSS+(responsiveCSS.includes('/* PageGenie responsive guard */')?'':'\n'+guard)+(responsiveCSS.includes('/* PageGenie accessibility guard */')?'':'\n'+accessibleCSS)};
 }
 export function escapeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 export function exportDocument(composition,title,seo={}){return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:; frame-src https://www.youtube-nocookie.com https://player.twitch.tv; base-uri \'none\'; form-action \'none\'"><title>'+escapeText(title)+'</title>'+seoHead(composition,title,seo)+'<style>'+composition.css+'</style></head><body>'+composition.html+'</body></html>';}

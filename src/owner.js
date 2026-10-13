@@ -1,3 +1,5 @@
+import {installAccessibility} from './accessibility.js';
+installAccessibility();
 import {installOwnerDomainCare} from './domain-care-ui.js';
 import {initializeApp} from 'firebase/app';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'firebase/auth';

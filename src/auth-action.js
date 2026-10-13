@@ -1,3 +1,5 @@
+import {installAccessibility} from './accessibility.js';
+installAccessibility();
 import {protectBrowser} from './app-attestation.js';
 import {initializeApp} from 'firebase/app';
 import {getAuth,checkActionCode,applyActionCode,verifyPasswordResetCode,confirmPasswordReset} from 'firebase/auth';

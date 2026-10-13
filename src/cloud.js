@@ -1,3 +1,5 @@
+import {installAccessibility} from './accessibility.js';
+installAccessibility();
 import {installOwnerSecurity} from './owner-security.js';
 import {protectBrowser} from './app-attestation.js';
 import {checkoutNavigation} from './checkout-navigation.js';
