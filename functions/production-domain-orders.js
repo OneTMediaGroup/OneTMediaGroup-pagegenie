@@ -3,9 +3,14 @@ import {sameDomainPrice,domainName} from './domain-registration.js';
 
 // Server-only order processor. The scheduled caller is gated by both live-sales switches.
 // Every provider operation is injected by trusted orchestration, never browser input.
+export function productionTotalMatches(session,order){
+ if(order.cad?.taxMode!=='stripe-automatic')return session.amount_total===order.cad?.totalCents;
+ const tax=session.total_details?.amount_tax;
+ return session.automatic_tax?.enabled===true&&session.automatic_tax.status==='complete'&&session.amount_subtotal===order.cad.totalCents&&Number.isSafeInteger(tax)&&tax>=0&&session.total_details.amount_discount===0&&session.total_details.amount_shipping===0&&session.amount_total===order.cad.totalCents+tax;
+}
 export function assertProductionPayment(session,order,uid){
  const pi=session?.payment_intent,charge=pi?.latest_charge;
- if(order?.environment!=='production'||session?.livemode!==true||pi?.livemode!==true||charge?.livemode!==true||session.id!==order.sessionId||session.mode!=='payment'||session.status!=='complete'||session.payment_status!=='paid'||session.currency!=='cad'||!Number.isSafeInteger(order.cad?.totalCents)||order.cad.totalCents<=0||session.amount_total!==order.cad.totalCents||pi.amount_received!==session.amount_total||pi.currency!=='cad'||pi.status!=='succeeded'||!pi.id||!charge.id||charge.paid!==true||charge.refunded!==false||charge.amount_refunded!==0||charge.disputed!==false||session.metadata?.app!=='pagegenie'||session.metadata?.kind!=='domain'||session.metadata?.uid!==uid||session.metadata?.projectId!==order.projectId||session.metadata?.orderId!==order.orderId)throw Error('A matching, unrefunded live domain payment is required.');
+ if(order?.environment!=='production'||session?.livemode!==true||pi?.livemode!==true||charge?.livemode!==true||session.id!==order.sessionId||session.mode!=='payment'||session.status!=='complete'||session.payment_status!=='paid'||session.currency!=='cad'||!Number.isSafeInteger(order.cad?.totalCents)||order.cad.totalCents<=0||!productionTotalMatches(session,order)||pi.amount_received!==session.amount_total||pi.currency!=='cad'||pi.status!=='succeeded'||!pi.id||!charge.id||charge.paid!==true||charge.refunded!==false||charge.amount_refunded!==0||charge.disputed!==false||session.metadata?.app!=='pagegenie'||session.metadata?.kind!=='domain'||session.metadata?.uid!==uid||session.metadata?.projectId!==order.projectId||session.metadata?.orderId!==order.orderId)throw Error('A matching, unrefunded live domain payment is required.');
  return pi.id;
 }
 function resultState(result,order){
@@ -47,7 +52,7 @@ export async function processProductionDomainOrder({db,uid,projectId,sessionId,e
   if(value?.orderId!==order.orderId||value.status!=='checkout')return null;
   if(lock.exists)throw Error('Domain already claimed; reconcile the existing order.');
   assertProductionPayment(session,value,uid);reviewedRegistration(value.details,fresh,value.approval,now);
-  const data={...value,status:'submitting',paymentStatus:'paid',paymentIntentId,registrationSubmittedAt:now,nextAttemptAt:now+60000};
+  const data={...value,status:'submitting',paymentStatus:'paid',paymentIntentId,paidAt:now,paidAmountCents:session.amount_total,paidTaxCents:session.total_details?.amount_tax||0,registrationSubmittedAt:now,nextAttemptAt:now+60000};
   tx.set(reservation,{uid,projectId,orderId:value.orderId,claimedAt:now});tx.set(ref,data);return data;
  });
  if(!claimed)return (await ref.get()).data();order=claimed;

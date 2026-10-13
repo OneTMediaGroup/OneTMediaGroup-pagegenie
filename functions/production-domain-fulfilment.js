@@ -8,10 +8,10 @@ import {processProductionDomainOrder} from './production-domain-orders.js';
 import {cloudflareQuote} from './domain-registration.js';
 import {productionRegistrar} from './domain-provisioning.js';
 import {runtimeDomainConnector} from './domain-runtime-connector.js';
-const stripeKey=defineSecret('STRIPE_SECRET_KEY'),registrar=defineSecret('CLOUDFLARE_REGISTRAR_TOKEN'),dns=defineSecret('CLOUDFLARE_PRODUCTION_DNS_TOKEN');
+const stripeKey=defineSecret(config.testMode===true?'STRIPE_SECRET_KEY':'STRIPE_LIVE_SECRET_KEY'),registrar=defineSecret('CLOUDFLARE_REGISTRAR_TOKEN'),dns=defineSecret('CLOUDFLARE_PRODUCTION_DNS_TOKEN');
 export const fulfilProductionDomains=onSchedule({schedule:'every 5 minutes',region:'northamerica-northeast1',timeoutSeconds:300,maxInstances:1,secrets:[stripeKey,registrar,dns],retryCount:1},async()=>{
  if(!liveDomainSalesEnabled(config))return;
- if(!stripeKey.value().startsWith('sk_live_'))throw Error('Live Stripe credentials required.');
+ if(!/^(sk|rk)_live_/.test(stripeKey.value()))throw Error('Live Stripe credentials required.');
  const db=getFirestore(),stripe=new Stripe(stripeKey.value(),{apiVersion:'2024-06-20'}),accountId='73c71b31767e4449bb22322ce64c7ef8',token=registrar.value();
  const connect=runtimeDomainConnector(db,token,dns.value());
  const jobs=await db.collection('productionDomainJobs').where('status','in',['queued','retry']).orderBy('nextAttemptAt').limit(2).get();

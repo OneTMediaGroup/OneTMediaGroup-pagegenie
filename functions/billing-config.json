@@ -27,5 +27,12 @@
       "productId": "prod_VQKnJk12pRrMvV"
     }
   },
-  "liveDomainSales": false
+  "liveDomainSales": false,
+  "productionDomains": {
+    "stripeAccountId": "acct_1Ti3hv1uRlTVrdir",
+    "taxMode": "stripe-automatic",
+    "taxSettingsReviewed": false,
+    "stripeSecret": "STRIPE_LIVE_SECRET_KEY",
+    "webhookSecret": "STRIPE_LIVE_WEBHOOK_SECRET"
+  }
 }

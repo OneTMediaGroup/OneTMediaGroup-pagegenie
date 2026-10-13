@@ -28,7 +28,7 @@ export const connectDomainAfterPlanChange=onDocumentWritten({...triggerOptions,d
 export const connectDomainAfterPublication=onDocumentWritten({...triggerOptions,document:'publishedSites/{projectId}'},async e=>{const site=e.data?.after.data()||e.data?.before.data();if(site?.ownerId)return connectRegisteredDomain(site.ownerId,e.params.projectId);});
 export const domainConnectionStatus=onCall({region,maxInstances:2,cors:['https://pagegenie.ca','https://www.pagegenie.ca','https://onetmediagroup.github.io']},async r=>{
  if(!r.auth||!r.auth.token.email_verified)throw new HttpsError('permission-denied','Sign in and verify your email first.');const id=r.data?.projectId;if(!/^[a-zA-Z0-9-]{20,50}$/.test(id||''))throw new HttpsError('invalid-argument','Choose a saved website.');
- if(!(await getFirestore().doc(`users/${r.auth.uid}/projects/${id}`).get()).exists)throw new HttpsError('not-found','Website unavailable.');return {connection:await connectRegisteredDomain(r.auth.uid,id)};
+ if(!(await getFirestore().doc(`users/${r.auth.uid}/projects/${id}`).get()).exists)throw new HttpsError('not-found','Website unavailable.');const order=(await getFirestore().doc(`users/${r.auth.uid}/domainOrders/${id}`).get()).data();if(order?.environment==='production'){const saved=(await getFirestore().doc(`users/${r.auth.uid}/domainSettings/${id}`).get()).data();return {connection:saved?.orderId===order.orderId?saved:null};}return {connection:await connectRegisteredDomain(r.auth.uid,id)};
 });
 export async function resolveConnectedDomain(domain,db=getFirestore()){
  if(typeof domain!=='string'||domain.length>253||! /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(domain))return null;
