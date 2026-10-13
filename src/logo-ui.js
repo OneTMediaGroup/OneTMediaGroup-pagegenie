@@ -18,9 +18,9 @@ export function installLogoUI({db,functions,context,ensureProject,saveProject,op
  el('logoBack').onclick=()=>go(2);el('noBrandLogo').onclick=async()=>{setLogo(null);saveDraft();paint();try{await saveProject();status('Business name selected. All logo versions are still saved.');}catch{status('Business name selected on this device.');}};
  el('finishLogo').onclick=async()=>{if(working)return;working=true;paint();el('finishLogo').textContent='Preparing to publish…';status('Saving your website before publishing…');try{if(context().user)await saveProject();await (finish||(()=>window.finishLogoPublishing()))();}catch{status('Could not finish publishing. Your website and logo are saved; please try again.');}finally{working=false;paint();el('finishLogo').textContent='Continue to publishing →';}};
  function open(callback){finish=callback;go('logo');}
- const publishPreview=window.publishCloud;window.finishLogoPublishing=()=>publishPreview();const finishPublishing=()=>window.finishLogoPublishing();window.publishCloud=()=>open(finishPublishing);
+ const publishPreview=window.publishCloud;window.finishLogoPublishing=()=>publishPreview();const finishPublishing=()=>window.finishLogoPublishing();window.publishCloud=()=>{if(!context().user){openAccount();return;}open(finishPublishing);};
  document.querySelectorAll('button[onclick="publish()"]')?.forEach(button=>{button.textContent='Add my logo →';button.onclick=()=>open(context().user?finishPublishing:publish);});
- const editButton=document.createElement('button');editButton.className='ghost';editButton.textContent='Logo & branding';editButton.onclick=()=>open(finishPublishing);document.querySelector('#screen2 .toolbar .row').prepend(editButton);
+ const editButton=document.createElement('button');editButton.className='ghost';editButton.textContent='Logo & branding';editButton.onclick=()=>context().user?open(finishPublishing):openAccount();document.querySelector('#screen2 .toolbar .row').prepend(editButton);
  // Refresh the step indicator for restored projects without navigating away.
  const names=['Your business','Genie at work','Make it yours','Domain & plan','Your logo','Publish & grow'];el('steps').innerHTML=names.map((name,i)=>`<div class="step ${i===(current===4?5:current)?'active':''}"><b>${i+1}</b>${name}</div>`).join('');
  return {open,refresh};

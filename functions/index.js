@@ -19,6 +19,11 @@ export const generateWebsite=onCall({region:'northamerica-northeast1',secrets:[O
  try{return await generateCopy({key:OPENAI_API_KEY.value(),model:data.visual?'gpt-6.1-sol':OPENAI_MODEL.value(),data});}catch(error){if(error instanceof HttpsError)throw error;throw new HttpsError('unavailable','AI could not complete your website. Please try again.');}
 });
 
+import {generateGuestDraft,cleanupGuestData} from './guest-generation.js';
+import {onSchedule} from 'firebase-functions/v2/scheduler';
+export const cleanupGuestDrafts=onSchedule({schedule:'every 24 hours',region:'northamerica-northeast1',maxInstances:1,timeoutSeconds:120},()=>cleanupGuestData({db:getFirestore()}));
+export const generateGuestWebsite=onCall({region:'northamerica-northeast1',secrets:[OPENAI_API_KEY],timeoutSeconds:240,memory:'256MiB',maxInstances:2,concurrency:4,cors:['https://pagegenie.ca','https://www.pagegenie.ca','https://onetmediagroup.github.io']},request=>generateGuestDraft({db:getFirestore(),request,reserveAI:uid=>reserveAiAttempt({db:getFirestore(),uid,kind:'website'}),generate:data=>generateCopy({key:OPENAI_API_KEY.value(),model:OPENAI_MODEL.value(),data})}));
+
 // Logo history and allowances are written only by trusted server functions.
 import {logoRequest,generateLogoImage,compactLogo,LOGO_ALLOWANCE,remainingLogos} from './logo.js';
 const OPENAI_LOGO_MODEL=defineString('OPENAI_LOGO_MODEL',{default:'gpt-image-2.5-flare'});
