@@ -3,7 +3,7 @@ export function installGuidance(doc=document){
  let goal='';const box=doc.createElement('div');box.className='genie-goals';box.setAttribute('role','group');box.setAttribute('aria-label','What should your website help you do? Optional');
  const label=doc.createElement('p');label.className='small';label.textContent='What’s your website here to do?';box.append(label);
  for(const [value,title] of goals){const b=doc.createElement('button');b.type='button';b.className='ghost';b.textContent=title;b.setAttribute('aria-pressed','false');b.onclick=()=>{goal=goal===value?'':value;paint();doc.getElementById('description').dispatchEvent(new doc.defaultView.Event('change',{bubbles:true}));};b.dataset.goal=value;box.append(b);}
- doc.querySelector('#screen0 .hero').append(box);
+ const intake=doc.querySelector('#intake');if(intake)intake.prepend(box);else doc.querySelector('#screen0 .hero').append(box);
  const help=doc.createElement('p');help.className='small';help.id='genieBriefHelp';help.setAttribute('aria-live','polite');help.hidden=true;const description=doc.getElementById('description');description.after(help);description.setAttribute('aria-describedby',help.id);
  description.addEventListener('blur',()=>{const text=description.value.trim();help.hidden=!text||text.length>=90;help.textContent='Want a stronger first draft? Add who you help and what makes you different. You can keep going as you are.';});
  const request=doc.getElementById('aiRequest'),prompts=doc.createElement('div');prompts.className='genie-prompts';prompts.setAttribute('role','group');prompts.setAttribute('aria-label','Suggested Genie edits');

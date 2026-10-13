@@ -49,3 +49,5 @@ await writeSEOFiles();
 await build({entryPoints:['src/owner.js'],bundle:true,format:'esm',minify:true,outfile:'assets/owner.js',target:['es2022'],legalComments:'eof'});
 const ownerVersion=createHash('sha256').update(await readFile('assets/owner.js')).digest('hex').slice(0,12);
 await writeFile('owner.html',accessible(await readFile('src/owner.html','utf8')).replace('./assets/owner.js',`./assets/owner.js?v=${ownerVersion}`));
+
+await writeFile('assets/robo-home.css',await readFile('src/robo-home.css','utf8'));
