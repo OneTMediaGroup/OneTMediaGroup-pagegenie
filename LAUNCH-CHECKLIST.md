@@ -105,3 +105,8 @@ No soft launch or public paid launch is approved. Passing these tests does not r
 - Saved-logo refinement uses the owner's current-project version as an image reference to the edits endpoint. References cannot be arbitrary URLs or another customer's path. Reference and output moderation remain required. A description of the change is required; the original stays saved and the new version records its reference. Refinements share the existing three-concept allowance, verified-account gate, daily ceilings and idempotent reservation.
 - 205 automated tests pass, including goal validation/toggle/restore, image-edit multipart reference submission, refusal of malformed references, explicit refinement selection and exhausted allowance. The 16-context accessibility scan passes. Live synthetic Northline generation selected trade and Request a Consultation; live image refinement preserved its name and roofline and passed safety review. These provider checks did not publish or modify a customer's site or logo history.
 - generateWebsite and generateLogo deployed successfully. Live payments remain off.
+
+## Production order preparation — 13 October 2026
+- Added a staged, disabled-by-default production order core with live-payment checks, atomic order/domain reservation, no blind purchase retries, separate connection recovery, and nine passing fixture tests.
+- This does not close production domain fulfilment: no trigger, credentials, retry scheduler or alert delivery is bound. See DOMAIN-PRODUCTION-READINESS.md for remaining integration and live verification.
+- Live payments remain off; no purchase performed.

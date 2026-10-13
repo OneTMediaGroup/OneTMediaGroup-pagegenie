@@ -45,3 +45,16 @@ Last direct domain check at 19:26 UTC: certificate hostname mismatch, Firebase C
 ## HTTPS readiness update — 12 October 2026, 19:50 UTC
 
 Normal certificate validation now succeeds for pagegenie-domain-test.com: TLS 1.3, Google Trust Services certificate matching the domain, expiry 10 January 2027. Both public resolvers return 199.36.158.100. HTTPS returns 200 with Northline title, logo, email and phone; HTTP redirects 301 to HTTPS. Browser opened successfully without any bypass. Contact links point to the fictional demo email and phone, not live customer contacts. This completes the approved single-domain TLS check, not the remaining customer registrar orchestration/renewal/transfer work.
+
+## Staged production order core — 13 October 2026
+
+`production-domain-orders.js` adds a disabled-by-default server-only worker core. It is not exported as a Firebase function, not wired to webhooks and has no bound production credentials. No real registration or payment was made by these tests.
+
+- Requires matching live Stripe checkout, expanded successful PaymentIntent and unrefunded/undisputed paid charge; test payments are rejected.
+- Revalidates exact domain, fresh approved price and customer registrant before acquiring an atomic order/domain reservation.
+- Duplicate delivery cannot submit a second purchase; an uncertain response is reconciled by status only. Domain collision and non-active accounts stop processing.
+- A completed registration survives DNS failure; connection work can retry separately. Delayed pending results cannot overwrite success.
+- Records nextAttemptAt and ownerAlertRequired for future scheduler/alert integration. These fields alone do not schedule jobs or deliver alerts.
+- Nine focused fixture tests pass. Combined domain tests passed before the final additional delayed-response regression; existing production adapter and sandbox-payment behaviour unchanged. Transaction concurrency tests use a serialised in-memory harness, not a deployed Firestore rehearsal.
+
+Remaining: authoritative live quote/checkout creation and tax/total review; production webhook/scheduler wiring; credential scope; actual connection/alias ownership and eligibility checks in the connector; production status reconciliation rehearsal; durable owner alert delivery; .ca provider schema; renewal/transfer fulfilment and reseller requirements. Reconciliation status domain matching does not replace a future end-to-end ownership check. Live purchases remain disabled.
