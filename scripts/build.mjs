@@ -7,6 +7,8 @@ await build({entryPoints:['src/cloud.js'],bundle:true,format:'esm',minify:true,o
 const accessibilityCSS=await readFile('src/accessibility.css','utf8');
 const accessible=html=>html.replace('</head>','<link rel="icon" type="image/svg+xml" href="/assets/genie-lamp.svg"><style data-accessibility>'+accessibilityCSS+'</style></head>');
 let html=accessible(await readFile('PageGenie.html','utf8'));
+const roboStyleVersion=createHash('sha256').update(await readFile('src/robo-home.css')).digest('hex').slice(0,12);
+html=html.replace('assets/robo-home.css?v=2',`assets/robo-home.css?v=${roboStyleVersion}`);
 html=html.replace('<meta name="robots" content="noindex, follow">','').replace('</head>',homeSEO+'</head>');
 html=html.replace('</head>',`<script>if(new URLSearchParams(location.search).has('domain')||new URLSearchParams(location.search).has('site'))document.documentElement.dataset.publicOpening='true';</script><style>html[data-public-opening] main,html[data-public-opening] header{visibility:hidden}</style></head>`);
 html=html.replace('</head>', '<script>if(new URLSearchParams(location.search).has("review"))location.replace("/owner.html");</script></head>');
