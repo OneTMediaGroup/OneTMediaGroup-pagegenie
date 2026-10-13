@@ -34,7 +34,7 @@ Unknown, failed-paid and failed-refund writes create a private recovery request;
 - Used a separate, labelled **Northline · domain care test** draft and northline-domain-care.example sandbox fixture. Its paid-registration fields simulate an eligible order only; no Stripe transaction or registrar action exists for this fixture. The original Northline registration was not changed.
 - Submitted renewal help and transfer requests through the phone UI. Both persisted as open private requests, both buttons changed to Requested, and both records have notificationSentAt. Owner confirmed both alert emails arrived.
 - Dashboard Domains now opens domain care directly for registered domains; other domains retain the search/owner-details route. Ten focused dashboard/domain UI tests and the build passed.
-- Requests remain open for a later owner review rehearsal. No renewal, transfer, purchase, refund or live-payment enablement occurred.
+- Requests were subsequently resolved in the owner review rehearsal below. No renewal, transfer, purchase, refund or live-payment enablement occurred.
 
 ## Expiry-reminder delivery rehearsal — 12 October
 
@@ -43,3 +43,11 @@ Unknown, failed-paid and failed-refund writes create a private recovery request;
 - Deployed notifyDomainExpiry selected the verified customer email and sent the TEST notice; notificationSentAt recorded 12 October at 23:55 UTC. Owner confirmed receipt and correct content at gotyourschase@hotmail.com. The email contained the domain/date, warning that the website plan does not renew domains, no-charge support-request wording and sign-in link.
 - A second create of the same notice was rejected as already existing. Exactly one fixture notice exists. Restored the record to sandbox with its original 2027 expiry after delivery, preventing further production expiry notices for the fixture.
 - The production-wide schedule was not manually run: automatic approval review rejected its potential to email unrelated customers. Live delivery testing was deliberately scoped to one fixture; scheduler iteration/deduplication is covered by the earlier isolated Firestore rehearsal. This does not prove future cron uptime or production registrar expiry refresh. Live payments remain off.
+
+## Owner handling and customer update rehearsal — 12 October
+
+- Used the protected scotfree owner dashboard at 390 × 844 to mark both fictional Northline requests handled. Saved explicit customer-facing outcomes explaining that no actual renewal or transfer occurred and no charge was made.
+- Read back both records: status resolved and the exact outcome notes persisted.
+- In the existing Chrome tab signed in as gotyourschase@hotmail.com, loaded the latest customer controls, opened Domains → Northline · domain care test, and confirmed both resolved outcomes through the actual customer UI at 390 × 844. Screenshot saved outside the repository as domain-care-customer-phone.png.
+- Fixed the owner queue's stale open-request count after handling. It now updates the remaining count or shows “All caught up. No open domain requests.” Two focused UI tests, the build and diff checks passed; change pushed as debb920.
+- This verifies support-request handling and customer visibility only. It does not perform or prove a registrar renewal or transfer. Live payments remain off.

@@ -80,3 +80,5 @@ No soft launch or public paid launch is approved. Passing these tests does not r
 - Domain-care phone rehearsal: both renewal and transfer requests saved; server delivery markers present; owner confirmed both inbox alerts. Registered-domain dashboard shortcut now opens management directly. Live payments remain off.
 
 - Expiry reminder rehearsal: correct seven-day TEST email accepted by the deployed delivery function and confirmed received by owner; duplicate notice creation blocked; fictional record restored to sandbox. All reminder boundaries covered by seven focused tests. Production-wide mail run was not invoked. Live payments remain off.
+
+- Owner/customer domain-care rehearsal: both fictional requests marked handled in protected phone UI; customer phone UI shows both saved outcomes. Fixed stale owner queue count; two focused UI tests and build passed. No registrar action or charge; live payments remain off.
