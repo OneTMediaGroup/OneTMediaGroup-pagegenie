@@ -1,8 +1,9 @@
 // Always read current Stripe objects: webhook delivery order must not restore old access.
-async function baseBillingState(s,state){
+function assertMode(object,live){if(object.livemode!==live)throw Error(live?'Live payment required':'Test payments only');}
+async function baseBillingState(s,state,live=false){
  if(state.subscriptionId){
   const sub=await s.subscriptions.retrieve(state.subscriptionId,{expand:['latest_invoice.payment_intent.latest_charge']});
-  if(sub.livemode)throw Error('Test payments only');
+  assertMode(sub,live);
   const invoice=typeof sub.latest_invoice==='object'?sub.latest_invoice:null;
   let charge=invoice?.payment_intent?.latest_charge;
   if(!charge&&invoice?.charge)charge=typeof invoice.charge==='string'?await s.charges.retrieve(invoice.charge):invoice.charge;
@@ -11,16 +12,16 @@ async function baseBillingState(s,state){
  }
  if(state.sessionId){
   const session=await s.checkout.sessions.retrieve(state.sessionId,{expand:['payment_intent.latest_charge']});
-  if(session.livemode)throw Error('Test payments only');
-  if(session.subscription)return baseBillingState(s,{...state,subscriptionId:typeof session.subscription==='string'?session.subscription:session.subscription.id}).then(v=>({...v,subscriptionId:typeof session.subscription==='string'?session.subscription:session.subscription.id}));
+  assertMode(session,live);
+  if(session.subscription)return baseBillingState(s,{...state,subscriptionId:typeof session.subscription==='string'?session.subscription:session.subscription.id},live).then(v=>({...v,subscriptionId:typeof session.subscription==='string'?session.subscription:session.subscription.id}));
   const charge=session.payment_intent?.latest_charge;
   const refunded=!!charge&&(charge.refunded||charge.amount_refunded>0);
   return {paid:session.payment_status==='paid'&&!refunded,status:refunded?'refunded':session.payment_status==='paid'?'paid':session.status==='expired'?'expired':'pending',subscriptionId:null};
  }
  return {paid:false,status:'none'};
 }
-export async function syncBillingState(s,ref){
- return ref.firestore.runTransaction(async tx=>{const snapshot=await tx.get(ref);if(!snapshot.exists)return {paid:false,status:'none',testMode:true};const state=snapshot.data()||{};const update=await currentBillingState(s,state);if(Object.entries(update).some(([key,value])=>state[key]!==value))tx.set(ref,update,{merge:true});return {...state,...update,testMode:true};});
+export async function syncBillingState(s,ref,{live=false}={}){
+ return ref.firestore.runTransaction(async tx=>{const snapshot=await tx.get(ref);if(!snapshot.exists)return {paid:false,status:'none',testMode:!live};const state=snapshot.data()||{};const update=await currentBillingState(s,state,{live});if(Object.entries(update).some(([key,value])=>state[key]!==value))tx.set(ref,update,{merge:true});return {...state,...update,testMode:!live};});
 }
 export async function billingEventTarget(s,event){
  const object=event.data.object;
@@ -37,14 +38,14 @@ export async function billingEventTarget(s,event){
 }
 
 const clearedDispute=status=>['won','warning_closed'].includes(status);
-export async function currentBillingState(s,state){
- const result=await baseBillingState(s,state);
+export async function currentBillingState(s,state,{live=false}={}){
+ const result=await baseBillingState(s,state,live);
  const ids=state.disputeIds||[];
- for(const id of ids){const dispute=await s.disputes.retrieve(id);if(dispute.livemode)throw Error('Test payments only');if(!clearedDispute(dispute.status))return {...result,paid:false,status:'disputed'};}
+ for(const id of ids){const dispute=await s.disputes.retrieve(id);assertMode(dispute,live);if(!clearedDispute(dispute.status))return {...result,paid:false,status:'disputed'};}
  return result;
 }
-export async function recordBillingDispute(s,ref,id){
- const dispute=await s.disputes.retrieve(id);if(dispute.livemode)throw Error('Test payments only');
+export async function recordBillingDispute(s,ref,id,{live=false}={}){
+ const dispute=await s.disputes.retrieve(id);assertMode(dispute,live);
  await ref.firestore.runTransaction(async tx=>{const snapshot=await tx.get(ref);if(!snapshot.exists)return;const ids=snapshot.data().disputeIds||[];if(!ids.includes(id))tx.set(ref,{disputeIds:[...ids,id]},{merge:true});});
- return syncBillingState(s,ref);
+ return syncBillingState(s,ref,{live});
 }

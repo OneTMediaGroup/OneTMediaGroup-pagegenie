@@ -34,5 +34,6 @@
     "taxSettingsReviewed": false,
     "stripeSecret": "STRIPE_LIVE_SECRET_KEY",
     "webhookSecret": "STRIPE_LIVE_WEBHOOK_SECRET"
-  }
+  },
+  "livePlanNotifications": false
 }

@@ -86,3 +86,5 @@ export {automaticDomainConnections} from './automatic-domain-connections.js';
 export {fulfilProductionDomains} from './production-domain-fulfilment.js';
 
 export {stripeDomainWebhook} from "./production-domain-webhook.js";
+
+export {stripeLivePlanWebhook} from './live-plan-webhook.js';
