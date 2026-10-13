@@ -1,6 +1,6 @@
 import {domainName} from './domain-registration.js';
 import {ensureFirebaseDomain,applyHostingDns} from './domain-provisioning.js';
-import {entitlements} from './entitlements.js';
+import {environmentEntitlements} from './entitlements.js';
 
 // Trusted server orchestration only. Provider callbacks never receive browser-selected credentials.
 export async function connectProductionDomain({db,uid,projectId,order,ensureHosting,applyDns,now=Date.now()}){
@@ -14,7 +14,7 @@ export async function connectProductionDomain({db,uid,projectId,order,ensureHost
   if(claim?.uid!==uid||claim?.projectId!==projectId||claim?.orderId!==order.orderId)throw Error('Registration ownership could not be verified.');
   if(life&&life.status!=='active')throw Error('Account unavailable.');
   if(alias&&(alias.uid!==uid||alias.projectId!==projectId||alias.orderId!==order.orderId))throw Error('Domain already belongs to another connection.');
-  if(!entitlements(billing).customDomain)return {status:'awaiting-plan',ready:false};
+  if(!environmentEntitlements(billing,{testMode:false}).customDomain)return {status:'awaiting-plan',ready:false};
   if(!site?.hosting||site.ownerId!==uid||restriction?.suspended)return {status:'awaiting-publication',ready:false};
   return null;
  }
