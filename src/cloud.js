@@ -1,3 +1,4 @@
+import {installSidebarGenie} from './sidebar-genie.js';
 import {installGenieFriend} from './genie-friend.js';
 import {installGuidance} from './genie-guidance.js';
 const guidance=installGuidance();
@@ -133,8 +134,9 @@ const designHistory=installDesignVersions({
  saveProject:async()=>{if(user)await saveCloudProject(currentId(),payload());},saveLocal:()=>saveDraft(),openAccount:()=>openAccount(),notify:toast,layoutSelect,cinematic:{status:async()=>{if(!user)return {paid:false,remaining:3};await user.reload();await user.getIdToken(true);const id=currentId();await saveCloudProject(id,payload());return (await httpsCallable(functions,'cinematicDesign')({projectId:id,action:'status'})).data;},generate:async(direction,requestId)=>(await httpsCallable(functions,'cinematicDesign',{timeout:240000})({projectId,action:'generate',direction,requestId})).data,upgrade:()=>go(3)}
 });
 window.refreshDesignVersions=()=>designHistory.refresh();
-askAI=()=>designHistory.run('refine',el('aiRequest').value.trim()||'Tighten the wording while keeping the current design and business details.');
-installGenieFriend({readSite:()=>{const page=new DOMParser().parseFromString(getComposition()?.html||el('site').outerHTML,'text/html');return {headline:page.querySelector('h1,h2')?.textContent||'',description:page.querySelector('p')?.textContent||'',hasContact:!!page.querySelector('a[href^="mailto:"],a[href^="tel:"]'),goal:guidance.get()};},apply:async command=>{el('aiRequest').value=command;await askAI();return el('versionStatus').textContent;},openContact:()=>contacts.open()});
+const sidebarGenie=installSidebarGenie({apply:async command=>{await designHistory.run('refine',command);return el('versionStatus').textContent;}});
+askAI=sidebarGenie.run;
+installGenieFriend({readSite:()=>{const page=new DOMParser().parseFromString(getComposition()?.html||el('site').outerHTML,'text/html');return {headline:page.querySelector('h1,h2')?.textContent||'',description:page.querySelector('p')?.textContent||'',hasContact:!!page.querySelector('a[href^="mailto:"],a[href^="tel:"]'),goal:guidance.get()};},apply:async command=>{await designHistory.run('refine',command);return el('versionStatus').textContent;},openContact:()=>contacts.open()});
 
 }
 
