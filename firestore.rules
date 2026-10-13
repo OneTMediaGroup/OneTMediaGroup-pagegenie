@@ -7,40 +7,49 @@ service cloud.firestore {
         || get(/databases/$(database)/documents/accountLifecycle/$(uid)).data.status == 'active';
     }
     match /users/{uid}/projects/{id} {
-      allow read: if owner(uid);
+      allow get: if owner(uid);
+      allow list: if owner(uid) && request.query.limit != null && request.query.limit <= 100;
       allow delete: if owner(uid) && active(uid);
       allow create, update: if false; // Protected saveProject callable enforces storage limits.
     }
     match /users/{uid}/logoProjects/{id} {
-      allow read: if owner(uid);
+      allow get: if owner(uid);
+      allow list: if false;
       allow write: if false;
       match /versions/{versionId} {
-        allow read: if owner(uid);
+        allow get: if owner(uid);
+        allow list: if owner(uid) && request.query.limit != null && request.query.limit <= 24;
         allow write: if false;
       }
     }
     match /users/{uid}/designHistories/{id} {
-      allow read: if owner(uid);
+      allow get: if owner(uid);
+      allow list: if false;
       allow write: if false;
       match /versions/{versionId} {
-        allow read: if owner(uid);
+        allow get: if owner(uid);
+        allow list: if false;
         allow write: if false;
       }
     }
     match /users/{uid}/billing/{id} {
-      allow read: if owner(uid);
+      allow get: if owner(uid);
+      allow list: if false;
       allow write: if false;
     }
     match /users/{uid}/domainOrders/{id} {
-      allow read: if owner(uid);
+      allow get: if owner(uid);
+      allow list: if false;
       allow write: if false;
     }
     match /users/{uid}/domainRequests/{id} {
-      allow read: if owner(uid);
+      allow get: if owner(uid);
+      allow list: if false;
       allow write: if false;
     }
     match /users/{uid}/domainSettings/{id} {
-      allow read: if owner(uid);
+      allow get: if owner(uid);
+      allow list: if false;
       allow write: if false;
     }
     match /publishedSites/{id} {

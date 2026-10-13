@@ -8,7 +8,7 @@ const {getAuth:adminAuth}=require('firebase-admin/auth'),{getFirestore:adminFire
 const admin=adminApp({projectId:'demo-pagegenie-recovery'}),db=adminFirestore(admin),auth=adminAuth(admin);
 const {initializeApp,deleteApp}=await import('firebase/app');
 const {getAuth,connectAuthEmulator,signInWithEmailAndPassword}=await import('firebase/auth');
-const {getFirestore,connectFirestoreEmulator,doc,getDoc,setDoc,deleteDoc,getDocs,collection,serverTimestamp,terminate}=await import('firebase/firestore');
+const {getFirestore,connectFirestoreEmulator,doc,getDoc,setDoc,deleteDoc,getDocs,collection,query,limit,serverTimestamp,terminate}=await import('firebase/firestore');
 const clients=[];let passed=0;async function denied(p){await assert.rejects(p,e=>e.code==='permission-denied');passed++;}
 const id='11111111-1111-1111-1111-111111111111',version='22222222-2222-2222-2222-222222222222';
 for(const uid of ['alice','bob'])await auth.createUser({uid,email:uid+'@example.invalid',emailVerified:true,password:'Dummy-'+randomUUID()});
@@ -21,6 +21,17 @@ await denied(setDoc(doc(alice,'users/alice/projects/'+id),{name:'Escalate',draft
 for(const path of privatePaths.filter(p=>!p.startsWith('projects/')))await denied(setDoc(doc(alice,'users/alice/'+path),{paid:true,plan:'complete'}));
 for(const path of ['ownerEmailSessions/'+id,'ownerTrustedBrowsers/'+id,'ownerEmailChallenges/'+id,'accountLifecycle/alice','accountRestrictions/alice','siteRestrictions/'+id,'billingCustomers/alice','aiControls/global','contentReports/'+id,'operationsAlerts/'+id]){await db.doc(path).set({private:true});for(const attacker of [alice,bob,anon]){await denied(getDoc(doc(attacker,path)));await denied(setDoc(doc(attacker,path),{contentAdmin:true,expires:Date.now()+999999}));}}
 await db.doc('accountLifecycle/alice').set({status:'active'});
+// Read-volume boundaries are enforced by rules, not just cooperative browser code.
+assert.equal((await getDocs(query(collection(alice,'users/alice/projects'),limit(100)))).size,1);passed++;
+await denied(getDocs(collection(alice,'users/alice/projects')));
+await denied(getDocs(query(collection(alice,'users/alice/projects'),limit(101))));
+await denied(getDocs(query(collection(bob,'users/alice/projects'),limit(100))));
+await denied(getDocs(query(collection(anon,'users/alice/projects'),limit(100))));
+assert.equal((await getDocs(query(collection(alice,'users/alice/logoProjects/'+id+'/versions'),limit(24)))).size,1);passed++;
+await denied(getDocs(collection(alice,'users/alice/logoProjects/'+id+'/versions')));
+await denied(getDocs(query(collection(alice,'users/alice/logoProjects/'+id+'/versions'),limit(25))));
+await denied(getDocs(query(collection(alice,'users/alice/billing'),limit(1))));
+
 await db.doc('publishedSites/'+id).set({ownerId:'alice',name:'Published fixture'});assert((await getDoc(doc(anon,'publishedSites/'+id))).exists());passed++;
 await denied(getDocs(collection(anon,'publishedSites')));await denied(setDoc(doc(alice,'publishedSites/'+id),{ownerId:'alice',draft:'Unmoderated bypass'}));await denied(deleteDoc(doc(bob,'publishedSites/'+id)));
 await db.doc('accountLifecycle/alice').set({status:'recovery'});await denied(setDoc(doc(alice,'users/alice/projects/'+id),{name:'Blocked',draft:'{}',updatedAt:serverTimestamp()}));await denied(getDoc(doc(anon,'publishedSites/'+id)));
