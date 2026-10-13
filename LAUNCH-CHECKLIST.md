@@ -2,14 +2,15 @@
 
 Updated 13 October 2026. New paid checkout remains disabled. Domain processing and owner refund controls were authorised for activation on 13 October; no transaction tests are authorised. This is the consolidated status record; an implemented feature alone is not launch approval.
 
-## Current launch gates — 13 October (supersedes the historical priority list below)
+## Launch authorised — 13 October 2026
 
-Completed: production billing migration (14 records), production credential/configuration deployment, Stripe notification activation with genuine signed delivery, free guest → account → publication acceptance, and the contact-before-policy phone check. Checkout remains off. Domain processing and owner refund controls are active under explicit owner approval; no purchase or refund was submitted for verification. Scheduled domain-care operation was observed on 13 October (details in DOMAIN-CARE-OPERATIONS.md).
+Owner explicitly instructed: “move everything to live and launch.” This supersedes earlier instructions to keep checkout off. Owner has taken responsibility for tax filing; filing itself is not independently verified by PageGenie or Stripe.
 
-Remaining:
-1. Owner business/policy sign-off: support/moderation retention periods and manual monthly review adopted 13 October (see PRIVACY-REQUEST-PROCEDURE.md). Owner will arrange tax filing/remittance; completion remains owner-confirmed before launch. Technical tax collection is not proof of remittance setup. Apply documented holds and provider-specific retention limitations.
-2. Final release preflight immediately before launch: recheck service health, credential expiry, live price/portal configuration and off-switches against the agreed release. Prior successful checks are recorded; repeat only time-sensitive checks rather than restarting the test programme.
-3. Explicit owner approval of the exact switches to enable. Notification intake is already enabled; checkout, domain processing and live refunds are separate controls and must not be enabled implicitly.
+Live release enables plan checkout and domain checkout. Domain processing, owner refund controls and Stripe notifications remain active. Free guest building, verified-account saving and free publication remain available; payment is optional. No agent-initiated real charge, refund or domain purchase is authorised or used as launch verification.
+
+Operational follow-up: monthly owner support/moderation retention review, domain-care requests and alerts, tax filing, and credential rotation before January 10–11, 2027. To stop new sales, disable livePlanSales and liveDomainSales; keep notifications and already-paid order handling available unless a separate incident requires a processing pause. Do not revert production mode to test mode.
+
+Next product work: integrate PageGenie into One T Media Group’s website ecosystem. Located existing project at /Users/scotmacair/Documents/Codex/2026-09-20/referenced-chatgpt-conversation-this-is-an/outputs/onetmediagroup-site; no edits to that separate project in this launch release.
 
 Known acceptance limits: no real-money transaction or real .ca purchase rehearsal is authorised. Production provider behaviour at that boundary remains untested. Renewals and transfers are owner-managed requests, not automatic fulfilment. Domain-care schedule runs successfully, but there are currently no eligible paid production orders to reconcile end-to-end. Phone acceptance used a responsive Chrome viewport, not a physical handset.
 

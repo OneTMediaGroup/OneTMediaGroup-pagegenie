@@ -83,3 +83,10 @@ Owner explicitly approved domain processing and owner refund controls while keep
 61 focused tests passed. Deployed fulfilProductionDomains, reviewDomainService, stripeWebhook, createDomainCheckout, confirmDomainCheckout, registerDomain and domainRegistrationStatus; all seven independently confirmed ACTIVE. Verified billing-config.json inside the deployed source archive: processing/refunds true, both sales false. reviewDomainService binds STRIPE_LIVE_DOMAIN_REFUND_KEY; worker binds production Stripe/registrar/DNS credentials. Five-minute scheduler ENABLED; this check verified scheduler configuration, not a paid fulfilment cycle.
 
 Read-only checks before and after deployment found zero production jobs and zero production domain orders. No checkout, charge, registrar create or refund request submitted. Refund write capability was not exercised; existing isolated recovery tests verify duplicate/uncertain-outcome protections. Customer sites and examples untouched. Next step remains separate explicit approval to open checkout; enabling these controls is not approval to run a real transaction test.
+
+
+## Owner-authorised sales launch — 13 October 2026
+
+Explicit go received. Production mode retained; livePlanSales and liveDomainSales enabled, with domain processing/refunds and both notification switches already active. Deployed createCheckout, createDomainCheckout, confirmDomainCheckout, reviewDomainRegistration, registerDomain and domainRegistrationStatus; all confirmed ACTIVE. Deployed source archive confirms all six enable flags true and testMode false. No production jobs/orders at verification. No real transaction test performed.
+
+Full suite ran 331 tests: 330 passed; the sole failure was the previous release assertion that deployed checkout must be off. Updated it to explicitly exercise the emergency sales-off configuration; all ten focused checkout/settings checks then passed. Customer checkout and policy unavailability wording removed. No price, tax classification or provider account changes.

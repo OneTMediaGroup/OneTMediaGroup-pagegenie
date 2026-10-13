@@ -27,7 +27,7 @@
       "productId": "prod_VQKnJk12pRrMvV"
     }
   },
-  "liveDomainSales": false,
+  "liveDomainSales": true,
   "liveDomainProcessing": true,
   "liveDomainNotifications": true,
   "productionDomains": {
@@ -38,7 +38,7 @@
     "webhookSecret": "STRIPE_LIVE_WEBHOOK_SECRET"
   },
   "livePlanNotifications": true,
-  "livePlanSales": false,
+  "livePlanSales": true,
   "productionPlans": {
     "taxSettingsReviewed": true,
     "portalConfiguration": "bpc_1UQ9Z61uRlTVrdirfy9bovzO",
