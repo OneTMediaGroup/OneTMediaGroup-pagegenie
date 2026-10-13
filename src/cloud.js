@@ -1,3 +1,4 @@
+import {installGenieFriend} from './genie-friend.js';
 import {installGuidance} from './genie-guidance.js';
 const guidance=installGuidance();
 import {installAccessibility} from './accessibility.js';
@@ -133,6 +134,7 @@ const designHistory=installDesignVersions({
 });
 window.refreshDesignVersions=()=>designHistory.refresh();
 askAI=()=>designHistory.run('refine',el('aiRequest').value.trim()||'Tighten the wording while keeping the current design and business details.');
+installGenieFriend({readSite:()=>{const page=new DOMParser().parseFromString(getComposition()?.html||el('site').outerHTML,'text/html');return {headline:page.querySelector('h1,h2')?.textContent||'',description:page.querySelector('p')?.textContent||'',hasContact:!!page.querySelector('a[href^="mailto:"],a[href^="tel:"]'),goal:guidance.get()};},apply:async command=>{el('aiRequest').value=command;await askAI();return el('versionStatus').textContent;},openContact:()=>contacts.open()});
 
 }
 
