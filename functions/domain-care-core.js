@@ -1,10 +1,15 @@
 import {createHash} from 'node:crypto';
 export const DOMAIN_ACTIONS=['renewal','transfer','recovery'];
+export function needsImmediateDomainReview(order){
+ if(!order||order.paymentStatus==='refunded'||order.status==='refunded')return false;
+ if(order.ownerAlertRequired===true)return true;
+ return ['unknown','refund-failed'].includes(order.status)||(order.status==='failed'&&order.paymentStatus==='paid');
+}
 export function domainCare(order,now=Date.now()){
  const expiry=typeof order?.expiresAt==='string'?Date.parse(order.expiresAt):NaN;
  const registered=order?.status==='registered'&&order?.paymentStatus==='paid';
  const days=Number.isFinite(expiry)?Math.ceil((expiry-now)/86400000):null;
- return {domain:order?.details?.domain||null,status:order?.status||'none',environment:order?.environment||'unknown',registered,expiresAt:Number.isFinite(expiry)?new Date(expiry).toISOString():null,daysRemaining:days,autoRenew:order?.autoRenew===true,renewalEstimateCents:Number.isSafeInteger(order?.cad?.renewalCents)?order.cad.renewalCents:null,serviceFeeCents:200,canRequestRenewal:registered,canRequestTransfer:registered,needsRecovery:['unknown','submitting','pending','failed','refund-pending','refund-failed','checkout-opening'].includes(order?.status)};
+ return {domain:order?.details?.domain||null,status:order?.status||'none',environment:order?.environment||'unknown',registered,expiresAt:Number.isFinite(expiry)?new Date(expiry).toISOString():null,daysRemaining:days,autoRenew:order?.autoRenew===true,renewalEstimateCents:Number.isSafeInteger(order?.cad?.renewalCents)?order.cad.renewalCents:null,serviceFeeCents:200,canRequestRenewal:registered,canRequestTransfer:registered,needsRecovery:needsImmediateDomainReview(order)||['needs-review','unknown','submitting','pending','failed','refund-pending','refund-failed','checkout-opening'].includes(order?.status)};
 }
 export function reminderStage(order,now=Date.now()){
  const care=domainCare(order,now);

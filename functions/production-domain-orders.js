@@ -27,7 +27,7 @@ export async function processProductionDomainOrder({db,uid,projectId,sessionId,e
  if(reserved&&(reserved.uid!==uid||reserved.orderId!==order.orderId||reserved.projectId!==projectId))throw Error('Domain is reserved by another order; owner review required.');
  const patch=async data=>db.runTransaction(async tx=>{const current=(await tx.get(ref)).data();if(current?.orderId!==order.orderId)throw Error('Order changed; owner review required.');if((current.status==='registered'&&data.status&&data.status!=='registered')||['refunded','refund-pending','refund-failed'].includes(current.status)){order=current;return;}tx.update(ref,data);order={...current,...data};});
  async function connectSaved(){
-  try{const connection=await connect({uid,projectId,order});await patch({connectionStatus:connection.status,nextAttemptAt:connection.ready?null:now+60000});}
+  try{const connection=await connect({uid,projectId,order});await patch({connectionStatus:connection.status,nextAttemptAt:connection.ready?null:now+60000,ownerAlertRequired:!connection.ready&&order.ownerAlertRequired===true});}
   catch{await patch({connectionStatus:'needs-review',nextAttemptAt:now+300000,ownerAlertRequired:true});}
  }
  if(order.status==='registered'){if(!reserved)throw Error('Missing domain reservation; owner review required.');await connectSaved();return order;}

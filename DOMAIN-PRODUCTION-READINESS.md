@@ -58,3 +58,9 @@ Normal certificate validation now succeeds for pagegenie-domain-test.com: TLS 1.
 - Nine focused fixture tests pass. Combined domain tests passed before the final additional delayed-response regression; existing production adapter and sandbox-payment behaviour unchanged. Transaction concurrency tests use a serialised in-memory harness, not a deployed Firestore rehearsal.
 
 Remaining: authoritative live quote/checkout creation and tax/total review; production webhook/scheduler wiring; credential scope; actual connection/alias ownership and eligibility checks in the connector; production status reconciliation rehearsal; durable owner alert delivery; .ca provider schema; renewal/transfer fulfilment and reseller requirements. Reconciliation status domain matching does not replace a future end-to-end ownership check. Live purchases remain disabled.
+
+## Recovery alert integration — 13 October 2026
+
+The existing domain-care trigger and scheduled sweep now recognise production `ownerAlertRequired` holds, including price/consent review and registered domains whose DNS connection failed. They create the same deduplicated owner recovery request used by the existing Resend notification path. Refunded orders do not generate immediate recovery alerts. Successful connection recovery clears the outstanding flag without another registration submission.
+
+Validation: all 259 automated tests pass, including the added hold/connection alert eligibility and successful recovery regressions. This validates code behaviour, not a newly received production-order email. Production purchase processing remains unexported and disabled: no production scheduler, live Stripe checkout, or expanded DNS credentials were activated by this change. Billing config remains testMode=true.

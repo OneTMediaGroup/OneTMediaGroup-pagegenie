@@ -11,7 +11,7 @@ import {confirmedDomainPayment} from './domain-pricing.js';
 import {requireOwnerMFA} from './owner-security.js';
 import {queueOperationAlert} from './operations-alerts.js';
 import {sandboxRegistrar} from './domain-registration.js';
-import {domainCare,DOMAIN_ACTIONS,domainRequestId,domainReminderId,reminderStage,expiryMessage,reconcileDomainOrder} from './domain-care-core.js';
+import {domainCare,needsImmediateDomainReview,DOMAIN_ACTIONS,domainRequestId,domainReminderId,reminderStage,expiryMessage,reconcileDomainOrder} from './domain-care-core.js';
 const region='northamerica-northeast1',mail=defineSecret('RESEND_API_KEY'),registrar=defineSecret('CLOUDFLARE_SANDBOX_TOKEN'),stripeKey=defineSecret('STRIPE_SECRET_KEY');
 const options={region,maxInstances:2,cors:['https://pagegenie.ca','https://www.pagegenie.ca','https://onetmediagroup.github.io']};
 const validId=id=>typeof id==='string'&&/^[a-zA-Z0-9-]{20,80}$/.test(id);
@@ -50,7 +50,7 @@ export const checkDomainCare=onSchedule({schedule:'every 6 hours',region,maxInst
  }
  await cursor.set({after:page.size===100?page.docs.at(-1).ref.path:null,checkedAt:Date.now(),checked:page.size});
 });
-export const queueDomainRecovery=onDocumentWritten({document:'users/{uid}/domainOrders/{projectId}',region,maxInstances:2,retry:true},async event=>{const order=event.data?.after.data();if(!order||!['unknown','refund-failed','failed'].includes(order.status)||order.paymentStatus==='refunded'||(order.status==='failed'&&order.paymentStatus!=='paid'))return;try{await queueDomainRequest({db:getFirestore(),uid:event.params.uid,projectId:event.params.projectId,order,kind:'recovery'});}catch(e){if(e.code!=='failed-precondition')throw e;}});
+export const queueDomainRecovery=onDocumentWritten({document:'users/{uid}/domainOrders/{projectId}',region,maxInstances:2,retry:true},async event=>{const order=event.data?.after.data();if(!needsImmediateDomainReview(order))return;try{await queueDomainRequest({db:getFirestore(),uid:event.params.uid,projectId:event.params.projectId,order,kind:'recovery'});}catch(e){if(e.code!=='failed-precondition')throw e;}});
 async function deliver(event,kind){
  if(!event.data)return;const item=event.data.data();if(item.notificationSentAt)return;
  if(Date.now()-Date.parse(event.time)>20*3600000){await event.data.ref.update({notificationFailedAt:FieldValue.serverTimestamp()});await queueOperationAlert({category:'delivery',service:'domain-care'});return;}
