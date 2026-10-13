@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import Stripe from '../functions/node_modules/stripe/esm/stripe.esm.node.js';
+import {handleLivePlanNotification} from '../functions/live-plan-http.js';
+const stripe=new Stripe('sk_test_fixture'),secret='whsec_local_fixture';
+function fixture(){const payload=JSON.stringify({id:'evt_fixture',livemode:true,type:'invoice.payment_failed',data:{object:{id:'in_fixture'}}});let status,applied=0,alerts=0;const response={status(n){status=n;return this;},send(){},sendStatus(n){status=n;}};return {request:{rawBody:Buffer.from(payload),headers:{'stripe-signature':stripe.webhooks.generateTestHeaderString({payload,secret})}},response,config:{livePlanNotifications:true},connect:()=>({stripe,secret}),apply:async(s,e)=>{assert.equal(e.type,'invoice.payment_failed');applied++;},alert:async()=>alerts++,values:()=>({status,applied,alerts})};}
+test('signed notification reaches processing; altered body is rejected',async()=>{let f=fixture();await handleLivePlanNotification(f);assert.deepEqual(f.values(),{status:200,applied:1,alerts:0});f=fixture();f.request.rawBody=Buffer.from('{}');await handleLivePlanNotification(f);assert.deepEqual(f.values(),{status:400,applied:0,alerts:0});});
+test('disabled notifications never connect or process even with a valid signature',async()=>{const f=fixture();f.config.livePlanNotifications=false;f.connect=()=>{throw Error('Must not access credentials');};await handleLivePlanNotification(f);assert.deepEqual(f.values(),{status:503,applied:0,alerts:0});});
+test('processing failure asks Stripe to retry and queues an alert',async()=>{const f=fixture();f.apply=async()=>{throw Error('Temporary storage failure');};await handleLivePlanNotification(f);assert.deepEqual(f.values(),{status:500,applied:0,alerts:1});});

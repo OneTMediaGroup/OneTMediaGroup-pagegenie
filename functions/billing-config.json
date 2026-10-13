@@ -35,5 +35,36 @@
     "stripeSecret": "STRIPE_LIVE_SECRET_KEY",
     "webhookSecret": "STRIPE_LIVE_WEBHOOK_SECRET"
   },
-  "livePlanNotifications": false
+  "livePlanNotifications": false,
+  "livePlanSales": false,
+  "productionPlans": {
+    "taxSettingsReviewed": false,
+    "portalConfiguration": "bpc_1UQ9Z61uRlTVrdirfy9bovzO",
+    "plans": {
+      "starter": {
+        "name": "PageGenie Starter",
+        "amount": 900,
+        "currency": "cad",
+        "mode": "subscription",
+        "priceId": "price_1UQ9RM1uRlTVrdirIx7y3mf0",
+        "productId": "prod_VR1UGmEG9kzfIy"
+      },
+      "complete": {
+        "name": "PageGenie Complete",
+        "amount": 1900,
+        "currency": "cad",
+        "mode": "subscription",
+        "priceId": "price_1UQ9Ro1uRlTVrdirs0E388Yi",
+        "productId": "prod_VR1U2KpCfvnFfN"
+      },
+      "html": {
+        "name": "PageGenie Own Your HTML",
+        "amount": 4900,
+        "currency": "cad",
+        "mode": "payment",
+        "priceId": "price_1UQ9SF1uRlTVrdir72m5YcMY",
+        "productId": "prod_VR1VxHVqVtM4OF"
+      }
+    }
+  }
 }

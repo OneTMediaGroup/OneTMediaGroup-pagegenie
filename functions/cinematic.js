@@ -5,10 +5,10 @@ import {HttpsError} from 'firebase-functions/v2/https';
 import {onCall} from './active-call.js';
 import {defineSecret,defineString} from 'firebase-functions/params';
 import {getFirestore} from 'firebase-admin/firestore';
-import {readBilling} from './billing.js';
+import {readBilling,planSecrets} from './billing.js';
 import {entitlements} from './entitlements.js';
 export const CINEMATIC_ALLOWANCE=3;
-const key=defineSecret('OPENAI_API_KEY'),stripeKey=defineSecret('STRIPE_SECRET_KEY');
+const key=defineSecret('OPENAI_API_KEY');
 const model=defineString('OPENAI_LOGO_MODEL',{default:'gpt-image-2.5-flare'});
 export function cinematicPaid(state){const access=entitlements(state);return access.hosting||access.html;}
 export async function cinematicImage({key,model,data,fetcher=fetch}){
@@ -32,4 +32,4 @@ export async function cinematicAction({db,request,billing,image}){
  try{let draft;try{draft=JSON.parse(project.data().draft);}catch{throw Error('Invalid website');}const photo=await image({business:draft.fields.business,description:draft.fields.description,services:draft.fields.services,direction:data.direction});const result={image:photo,label:'Cinematic image '+reservation.number,createdAt:Date.now()};await db.runTransaction(async tx=>{const state=(await tx.get(ref)).data();if(state?.pending?.id!==data.requestId)throw Error('Image request expired');tx.set(version,result);tx.set(ref,{generated:reservation.number,pending:null},{merge:true});});return {...result,remaining:3-reservation.number};}
  catch(error){await db.runTransaction(async tx=>{if((await tx.get(ref)).data()?.pending?.id===data.requestId)tx.set(ref,{pending:null},{merge:true});});if(error instanceof HttpsError)throw error;throw new HttpsError('unavailable','Your image could not be completed. Your included image allowance was not used. Please try again.');}
 }
-export const cinematicDesign=onCall({region:'northamerica-northeast1',secrets:[key,stripeKey],timeoutSeconds:240,memory:'512MiB',maxInstances:2,concurrency:2,cors:['https://pagegenie.ca','https://www.pagegenie.ca','https://onetmediagroup.github.io']},request=>cinematicAction({db:getFirestore(),request,billing:readBilling,image:async data=>{await reserveAiAttempt({db:getFirestore(),uid:request.auth.uid,kind:'cinematic'});return cinematicImage({key:key.value(),model:model.value(),data});}}));
+export const cinematicDesign=onCall({region:'northamerica-northeast1',secrets:[key,...planSecrets],timeoutSeconds:240,memory:'512MiB',maxInstances:2,concurrency:2,cors:['https://pagegenie.ca','https://www.pagegenie.ca','https://onetmediagroup.github.io']},request=>cinematicAction({db:getFirestore(),request,billing:readBilling,image:async data=>{await reserveAiAttempt({db:getFirestore(),uid:request.auth.uid,kind:'cinematic'});return cinematicImage({key:key.value(),model:model.value(),data});}}));
