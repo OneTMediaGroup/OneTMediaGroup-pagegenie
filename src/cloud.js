@@ -183,7 +183,7 @@ if(!siteId)installDomainRegistration({db,functions,context:()=>({user,projectId}
 if(!siteId)installCreatorUI({get:getComposition,set:value=>setComposition(value,{changed:()=>saveDraft()}),save:()=>saveDraft(),notify:toast});
 
 import {installTrustUI} from './trust-ui.js';
-installTrustUI({functions,httpsCallable});
+installTrustUI({functions,httpsCallable,preparePublish:async()=>{if(!user){openAccount();return false;}if(!el('serviceCards').children.length){toast('Create your website before publishing.');return false;}const uid=user.uid;await user.reload();await user.getIdToken(true);if(!user?.emailVerified){openAccount();message('Verify your email before publishing your free website.');return false;}if(!await contacts.ensure())return false;return user?.uid===uid;}});
 
 import {installPrivacyUI} from './privacy-ui.js';
 if(!siteId)installPrivacyUI({functions,httpsCallable});

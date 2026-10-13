@@ -152,3 +152,7 @@ See STRIPE-CUTOVER-REVIEW.md for verified prices, portal, disabled destinations/
 - Existing in-app guest allowance correctly blocked a second distinct build; clarified misleading “website is ready” limit copy, deployed generateGuestWebsite, and passed eight focused guest/handoff tests.
 - Polish follow-up: missing contact information is requested after the policy agreement, causing the agreement to repeat after details are saved. Publication succeeds, but this ordering should be simplified.
 - Live plan/domain sales, domain processing and refunds remain off; notification intake stays enabled.
+
+## Publish-order polish — 13 October 2026
+- Missing business contact details now open before policy acceptance. Save & continue advances directly to the policy prompt, then publication; blank details and cancellation stop the flow. Existing details skip the form. Repeated taps cannot create duplicate publication dialogs.
+- 331 tests pass, including contact-save → one policy acceptance → publication and cancellation coverage; production bundle rebuilt. Checkout and money-movement configuration unchanged and off.
