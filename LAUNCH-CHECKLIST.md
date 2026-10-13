@@ -144,3 +144,11 @@ See STRIPE-CUTOVER-REVIEW.md for verified prices, portal, disabled destinations/
 - Both existing Stripe live destinations activated and independently show Delivered / HTTP 200 for a genuine harmless product-update event. Temporary product subscription removed; permanent counts restored to 15 plan events and 2 domain events.
 - Plan/domain notification receivers enabled; domain fulfilment remains independently paused. Checkout, refunds and domain purchases remain off. No real charge or customer purchase.
 - 330 tests pass; deployed unsigned requests rejected with 400. Notification transport gate is complete; real settlement remains intentionally untested. Final operations/policy/customer acceptance and separate sales/fulfilment approval remain.
+
+## Free customer acceptance — 13 October 2026
+- Chrome guest generated Cedar Trail Garden Care without sign-in or checkout. Owner created and verified support@pagegenie.ca; the exact guest design appeared in its saved projects and saved again successfully.
+- Published free at https://pagegenie.ca/?site=eca26283-7f51-40f0-8288-59d82f4f128c after owner-authorised policies acceptance. Used business-name branding and fictional contact hello@cedartrail.example; no logo generation, checkout, real charge or domain purchase in this run.
+- Published layout visually checked at 390×844 and 1440×900 browser viewports; estimate navigation reaches contact. This is responsive browser testing, not a physical-device test.
+- Existing in-app guest allowance correctly blocked a second distinct build; clarified misleading “website is ready” limit copy, deployed generateGuestWebsite, and passed eight focused guest/handoff tests.
+- Polish follow-up: missing contact information is requested after the policy agreement, causing the agreement to repeat after details are saved. Publication succeeds, but this ordering should be simplified.
+- Live plan/domain sales, domain processing and refunds remain off; notification intake stays enabled.
