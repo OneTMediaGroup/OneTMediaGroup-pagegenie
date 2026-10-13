@@ -1,3 +1,6 @@
+import billingConfig from './billing-config.json' with {type:'json'};
+import {recoverProductionDomain} from './production-domain-recovery.js';
+import {productionRegistrar} from './domain-provisioning.js';
 import {onCall} from './active-call.js';
 import {HttpsError} from 'firebase-functions/v2/https';
 import {getFirestore,FieldValue,FieldPath} from 'firebase-admin/firestore';
@@ -13,6 +16,7 @@ import {queueOperationAlert} from './operations-alerts.js';
 import {sandboxRegistrar} from './domain-registration.js';
 import {domainCare,needsImmediateDomainReview,DOMAIN_ACTIONS,domainRequestId,domainReminderId,reminderStage,expiryMessage,reconcileDomainOrder} from './domain-care-core.js';
 const region='northamerica-northeast1',mail=defineSecret('RESEND_API_KEY'),registrar=defineSecret('CLOUDFLARE_SANDBOX_TOKEN'),stripeKey=defineSecret('STRIPE_SECRET_KEY');
+const productionRegistrarKey=defineSecret('CLOUDFLARE_REGISTRAR_TOKEN'),productionStripeKey=defineSecret(billingConfig.liveDomainRefunds===true?'STRIPE_LIVE_DOMAIN_REFUND_KEY':'STRIPE_LIVE_SECRET_KEY');
 const options={region,maxInstances:2,cors:['https://pagegenie.ca','https://www.pagegenie.ca','https://onetmediagroup.github.io']};
 const validId=id=>typeof id==='string'&&/^[a-zA-Z0-9-]{20,80}$/.test(id);
 export async function queueDomainRequest({db,uid,projectId,order,kind,now=Date.now()}){
@@ -28,15 +32,19 @@ export const domainManagement=onCall(options,async r=>{
  const requests=await db.collection(`users/${uid}/domainServiceRequests`).where('projectId','==',projectId).limit(30).get();
  return {care,requests:requests.docs.map(d=>{const x=d.data();return {id:d.id,kind:x.kind,status:x.status,createdAt:x.createdAt,resolution:x.resolution||null,lastCheck:x.lastCheck||null};})};
 });
-export const reviewDomainService=onCall({...options,timeoutSeconds:120,secrets:[registrar,stripeKey]},async r=>{
+export const reviewDomainService=onCall({...options,timeoutSeconds:120,secrets:[registrar,stripeKey,productionRegistrarKey,productionStripeKey]},async r=>{
  await requireOwnerMFA(r);const db=getFirestore();
- if(r.data?.action==='list'){const rows=await db.collectionGroup('domainServiceRequests').where('status','==','open').limit(50).get();return {requests:rows.docs.map(d=>({id:d.id,...d.data()}))};}
+ if(r.data?.action==='list'){const rows=await db.collectionGroup('domainServiceRequests').where('status','==','open').limit(50).get();return {liveRefundsEnabled:billingConfig.liveDomainRefunds===true,requests:rows.docs.map(d=>({id:d.id,...d.data()}))};}
  const {uid,id,action,note}=r.data||{};if(typeof uid!=='string'||!/^[a-zA-Z0-9_-]{1,128}$/.test(uid)||! /^[a-f0-9]{64}$/.test(id||''))throw new HttpsError('invalid-argument','Choose a domain request.');
  const ref=db.doc(`users/${uid}/domainServiceRequests/${id}`),request=(await ref.get()).data();if(!request||request.status!=='open')throw new HttpsError('not-found','Open request unavailable.');
  if(action==='resolve'){if(typeof note!=='string'||note.trim().length<10||note.length>1500)throw new HttpsError('invalid-argument','Explain the outcome in 10–1,500 characters.');await ref.update({status:'resolved',resolution:note.trim(),reviewer:r.auth.uid,updatedAt:Date.now()});return {message:'Request marked handled. This does not renew or transfer the domain.'};}
  if(!['check','refund'].includes(action)||request.kind!=='recovery')throw new HttpsError('invalid-argument','Choose a recovery check or record the outcome.');
  const orderRef=db.doc(`users/${uid}/domainOrders/${request.projectId}`),order=(await orderRef.get()).data();if(order?.orderId!==request.orderId)throw new HttpsError('failed-precondition','The order changed. Review it manually.');
- if(order.environment!=='sandbox')throw new HttpsError('failed-precondition','Production order recovery requires review in Stripe and the registrar. No purchase or refund has been attempted.');
+ if(order.environment==='production'){
+  const value=productionStripeKey.value();if(!/^(rk|sk)_live_/.test(value))throw new HttpsError('failed-precondition','Production recovery is not configured.');
+  try{const result=await recoverProductionDomain({db,ref:orderRef,uid,stripe:new Stripe(value,{apiVersion:'2024-06-20'}),action,refundsEnabled:billingConfig.liveDomainRefunds===true,registrarStatus:domain=>productionRegistrar({accountId:'73c71b31767e4449bb22322ce64c7ef8',token:productionRegistrarKey.value(),domain,operation:'status'})});await ref.update({lastCheck:result.message,checkedAt:Date.now(),reviewer:r.auth.uid,updatedAt:Date.now()});return result;}catch(e){throw new HttpsError('failed-precondition',e.message);}
+ }
+ if(order.environment!=='sandbox')throw new HttpsError('failed-precondition','Unknown order environment.');
  if(!stripeKey.value().startsWith('sk_test_'))throw new HttpsError('failed-precondition','Test payments only.');
  const stripe=new Stripe(stripeKey.value(),{apiVersion:'2024-06-20'});if(action==='refund'){if(order.environment!=='sandbox'||order.status!=='failed'||order.paymentStatus!=='paid')throw new HttpsError('failed-precondition','Only a confirmed failed, paid sandbox registration can be refunded here.');const session=await stripe.checkout.sessions.retrieve(order.sessionId,{expand:['payment_intent.latest_charge']});if(!confirmedDomainPayment(session,order,uid))throw new HttpsError('failed-precondition','Stripe payment does not match this order.');if(session.payment_intent?.latest_charge?.refunded||session.payment_intent?.latest_charge?.amount_refunded>0)throw new HttpsError('failed-precondition','This payment already has refund activity. Review it in Stripe before taking further action.');const result=await refundFailedDomain(orderRef,order,stripe);return {message:result.status==='refunded'?'Stripe confirmed the full refund, including the $2 service fee.':'Refund status: '+result.status+'. Check Stripe before any further action.'};}
  let result;try{result=await reconcileDomainOrder({order,stripe,registrarStatus:domain=>sandboxRegistrar({accountId:'73c71b31767e4449bb22322ce64c7ef8',token:registrar.value(),domain,operation:'status'})});}catch{throw new HttpsError('unavailable','Provider status could not be verified. The order remains on hold; do not submit another purchase.');}
