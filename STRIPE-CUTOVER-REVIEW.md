@@ -59,3 +59,18 @@ Activated the existing PageGenie Plan Payments — Live and PageGenie Domain Pay
 Removed product.updated from both destinations after verification; final active subscriptions are exactly the original 15 plan events and 2 domain checkout events. Updated descriptions to reflect the disabled sales state. Unsigned probes to both deployed endpoints return HTTP 400 Invalid signature. Verified all 27 release functions ACTIVE, 14 migrated billing records preserved and all 33 logo records unchanged.
 
 This verifies genuine Stripe-to-production transport and signature validation without money movement. Paid lifecycle logic remains covered by the prior Stripe test-mode rehearsal and automated tests; actual live settlement and .ca purchase remain untested by owner choice. Evidence screenshots: verification/stripe-plan-delivered.png and verification/stripe-domain-delivered.png. Next gates are final operations/policy/customer acceptance and separate fulfilment/sales approval.
+
+
+## Domain processing and owner refund readiness — 13 October 2026
+
+Owner requested readiness only, with checkout off and no charges or domain purchases until explicit go. All four gates remain false: livePlanSales, liveDomainSales, liveDomainProcessing, liveDomainRefunds. No deployment is needed merely to repeat readiness: fulfilProductionDomains is already deployed with its processing guard. Do not turn it on as a preparatory task; it authorises real registrar calls.
+
+Read-only production inventory: zero productionDomainJobs and zero production-environment domainOrders. STRIPE_LIVE_DOMAIN_REFUND_KEY latest version ENABLED (metadata check only, not a write-permission proof). 61 focused production-domain, payment and settings tests passed, including recovery safeguards. No live refund or registration request submitted.
+
+After explicit activation approval:
+1. Recheck pending jobs/orders and configuration immediately before activation; this empty inventory is only a point-in-time check.
+2. Set liveDomainProcessing=true and deploy fulfilProductionDomains and other consumers of that gate, keeping both sales switches false. Verify deployed function/scheduler readiness before opening domain checkout.
+3. Separately set liveDomainRefunds=true and deploy reviewDomainService; this binds the existing restricted STRIPE_LIVE_DOMAIN_REFUND_KEY instead of its current read-only credential. Verify owner authentication, deployment binding and enabled control. Do not submit a refund as a readiness check. Recovery validates the paid order, registrar outcome and duplicate-refund claim before any money movement.
+4. Only after owner approval open checkout. If stopping new sales later, leave processing available for already-paid orders unless a processing incident requires its own pause. Preserve all customer sites and records.
+
+Current preparation adds no scheduler changes, permission grants, credentials, charges or domain purchases. The refund write credential remains unbound until the separately approved activation deployment.
