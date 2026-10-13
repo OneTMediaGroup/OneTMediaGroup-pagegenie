@@ -12,3 +12,16 @@ test('Custom-domain delivery continues during scheduled cancellation and stops a
 });
 
 test('Operator test domains stay out of search while ordinary custom domains stay indexable',async()=>{const f=fixture();assert.match(await hostedDocument('northline.pagegenie.ca',f.db),/content="index, follow"/);f.records.get('hostedDomains/northline.pagegenie.ca').seoNoIndex=true;assert.match(await hostedDocument('northline.pagegenie.ca',f.db),/content="noindex, follow"/);});
+test('Only the exact operator showcase survives test-billing cancellation; restrictions still win',async()=>{
+ const owner='9Pv4uDwtRYbE3aRdshFTMsNWuID3',id='d3e3a063-a1e3-49d4-b487-55b633eb4c27';
+ function demo(host='northline.pagegenie.ca'){const f=fixture();f.records.set('hostedDomains/'+host,{status:'enabled',uid:owner,projectId:id});f.records.set('publishedSites/'+id,{name:'Northline',ownerId:owner,hosting:true,draft:JSON.stringify({composition})});f.records.set(`users/${owner}/billing/${id}`,{paid:false,status:'canceled',testMode:true});return f;}
+ for(const host of ['northline.pagegenie.ca','pagegenie-domain-test.com'])assert.match(await hostedDocument(host,demo(host).db),/Northline/);
+ for(const kind of ['host','owner','project','suspended','deleted','unpublished']){const host=kind==='host'?'customer.ca':'northline.pagegenie.ca',f=demo(host);
+ if(kind==='owner')f.records.get('hostedDomains/'+host).uid='other';
+ if(kind==='project')f.records.get('hostedDomains/'+host).projectId='other';
+ if(kind==='suspended')f.records.set('siteRestrictions/'+id,{suspended:true});
+ if(kind==='deleted')f.records.set('accountLifecycle/'+owner,{status:'recovery'});
+ if(kind==='unpublished')f.records.delete('publishedSites/'+id);
+ assert.equal(await hostedDocument(host,f.db),null);
+ }
+});

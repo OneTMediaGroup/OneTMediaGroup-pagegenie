@@ -12,11 +12,11 @@ Fifteen deployed billing/access/recovery functions were ACTIVE. Plan consumers c
 
 45 focused tests passed: live checkout gates/identity, notifications, plan access, cancellation/refund/dispute state, mode isolation, migration and guest handoff. Test/unmarked receipts cannot unlock production paid features. Free publication uses the preview path with no paid-feature requirement; account verification, ownership, contact details and policy/moderation checks still apply. Existing free sites/drafts/logos must not be removed by billing migration.
 
-Read-only billing inventory: 18 records; 9 eligible test records, 8 held (7 subscriptions need ending and 1 unresolved checkout), 1 non-test excluded. This snapshot precedes authorised disposable synthetic-account cleanup. Named testers/owner/example accounts require deliberate per-account handling; never bulk-delete them to remove a launch blocker.
+Historical pre-cleanup billing inventory: 18 records; 9 eligible test records, 8 held (7 subscriptions need ending and 1 unresolved checkout), 1 non-test excluded. This snapshot precedes authorised disposable synthetic-account cleanup. Named testers/owner/example accounts require deliberate per-account handling; never bulk-delete them to remove a launch blocker.
 
 ## Future activation sequence — NOT authorised or executed
 
-1. Review named test accounts and end only approved test subscriptions/checkout sessions. Run migration dry-run then exact per-record migration, preserving sites/logos/domains and archives. Resolve all holds before promising live upgrade availability.
+1. Approved test subscriptions/checkouts are now closed (see cleanup below). Run a fresh migration dry-run then exact per-record migration, preserving sites/logos/domains and archives. The latest audit has zero holds; migration itself remains pending.
 2. Prepare production mode with sales/refunds OFF. Deploy all configuration consumers as one reviewed release: createCheckout, billingStatus, createBillingPortal, downloadWebsite, promotionalKit, publishWebsite, websiteAnalytics, saveDomainSettings, cinematicDesign; customerWebsite, recordSiteEvent; connectDomainAfterRegistration, connectDomainAfterPlanChange, connectDomainAfterPublication, domainConnectionStatus, resolveDomain; createDomainCheckout, registerDomain, domainRegistrationStatus, stripeDomainWebhook, fulfilProductionDomains, automaticDomainConnections, reviewDomainService. Verify selected secrets and cached-access isolation. Keep test stripeWebhook isolated.
 3. Separately approve activation of live plan notification processing and its Stripe destination, then verify signed delivery. Enable checkout only after notification readiness and explicit launch approval. Enable liveDomainProcessing and deploy its matching production webhook/worker, then activate the domain destination before separately enabling liveDomainSales. Checkout requires processing readiness as well as the sales switch. Do not leave a payable link without working fulfilment.
 4. Recheck free generation/account/publication and correct paid access after deployment. A no-charge audit does not prove live card settlement; no real-money rehearsal is authorised.
@@ -28,4 +28,14 @@ Do not simply flip testMode back after live purchases exist: that would lock liv
 
 ## Authorised synthetic-account cleanup
 
-One machine-created @example.invalid account with four drafts, zero public sites and zero domain records entered the existing 30-day recovery/deletion flow. Verified test billing was archived, its test customer reference removed, and refresh tokens revoked. All its test subscriptions/checkouts were already closed; none needed cancellation/expiry. No real billing or named tester/owner/example account was removed. Remaining inventory: 15 billing records, 6 eligible, 8 held (7 subscription holds, 1 checkout hold), 1 non-test excluded. Cleanup does not make the remaining accounts launch-ready automatically.
+One machine-created @example.invalid account with four drafts, zero public sites and zero domain records entered the existing 30-day recovery/deletion flow. Verified test billing was archived, its test customer reference removed, and refresh tokens revoked. All its test subscriptions/checkouts were already closed; none needed cancellation/expiry. No real billing or named tester/owner/example account was removed. Inventory immediately after synthetic-account cleanup: 15 billing records, 6 eligible, 8 held (7 subscription holds, 1 checkout hold), 1 non-test excluded. Cleanup does not make the remaining accounts launch-ready automatically.
+
+## Authorised test billing cleanup — 13 October
+
+Cancelled the seven explicitly approved Stripe test subscriptions without proration or an immediate invoice, and expired the one unfinished test Checkout Session. Verified test mode and exact customer ownership before each provider operation. Archived prior billing records and reconciled current provider state: seven canceled, one expired, all unpaid. No live financial operation or account deletion occurred.
+
+Latest read-only migration inventory: 15 records, 14 eligible, zero held, one non-test excluded. No production-mode migration was applied; testMode remains true and all five live gates remain false.
+
+Before cancelling Northline's test subscription, deployed an exact operator-showcase exception for northline.pagegenie.ca and pagegenie-domain-test.com, restricted to their existing owner/project mapping. Publication, suspension, account lifecycle and enabled mapping checks still apply. This preserves public examples without granting paid editing features or customer-domain access. Twelve focused hosting/settings tests passed.
+
+After cleanup, hashes of all 89 protected site, logo, publication and domain records were unchanged. All five homepage examples and both connected Northline domains returned HTTP 200 with unchanged titles and response lengths.

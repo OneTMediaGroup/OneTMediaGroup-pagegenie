@@ -1,3 +1,4 @@
+import {isOperatorShowcase} from './showcase-hosting.js';
 import billingConfig from './billing-config.json' with {type:'json'};
 import {lifecycleBlocked} from './account-lifecycle.js';
 import {onRequest} from 'firebase-functions/v2/https';
@@ -13,7 +14,7 @@ export async function hostedDocument(host,db=getFirestore()){
  const [publicDoc,billingDoc]=await Promise.all([db.doc('publishedSites/'+mapping.projectId).get(),db.doc(`users/${mapping.uid}/billing/${mapping.projectId}`).get()]);
  if(lifecycleBlocked((await db.doc('accountLifecycle/'+mapping.uid).get()).data()))return null;
  const site=publicDoc.data();if((await db.doc('siteRestrictions/'+mapping.projectId).get()).data()?.suspended)return null;
- if(!site?.hosting||site.ownerId!==mapping.uid||!environmentEntitlements(billingDoc.data(),billingConfig).customDomain)return null;
+ if(!site?.hosting||site.ownerId!==mapping.uid||(!isOperatorShowcase(host,mapping,site)&&!environmentEntitlements(billingDoc.data(),billingConfig).customDomain))return null;
  const draft=JSON.parse(site.draft),win=new JSDOM('').window;
  try{return exportDocument(mediaComposition(cleanComposition(draft.composition,win),win,host),site.name+(draft.fields?.location?' — '+draft.fields.location:''),{url:'https://'+host+'/',indexable:mapping.seoNoIndex!==true}).replace('</body>','<footer style="padding:24px;text-align:center;font:16px sans-serif"><a href="https://pagegenie.ca/policies.html#report">Report this website</a> · <a href="https://pagegenie.ca/policies.html">PageGenie policies</a></footer></body>');}finally{win.close();}
 }

@@ -123,4 +123,11 @@ No soft launch or public paid launch is approved. Passing these tests does not r
 
 ## Final Stripe/access review — 13 October
 
-See STRIPE-CUTOVER-REVIEW.md for verified prices, portal, disabled destinations/endpoints, deployed secret bindings, activation/rollback order and remaining named-account migration holds. Added separate domain processing gate so stopping new sales need not strand paid orders; all gates remain off. One disposable synthetic account is in 30-day recovery; owner, named testers and public examples preserved. Remaining 8 billing holds must be resolved deliberately before those sites can upgrade in live mode. No real charges, refunds or purchases.
+See STRIPE-CUTOVER-REVIEW.md for verified prices, portal, disabled destinations/endpoints, deployed secret bindings, activation/rollback order and remaining named-account migration holds. Added separate domain processing gate so stopping new sales need not strand paid orders; all gates remain off. One disposable synthetic account is in 30-day recovery; owner, named testers and public examples preserved. The eight billing holds were subsequently resolved by the authorised test cleanup below; production billing migration remains pending. No real charges, refunds or purchases.
+
+## Test subscription cleanup — 13 October
+
+- Seven approved Stripe test subscriptions cancelled without proration/immediate invoices; one unfinished test checkout expired. Prior billing records archived. No real charges, refunds or purchases.
+- Fresh migration audit: 14 eligible records, zero holds, one non-test record excluded. Migration is not yet applied.
+- All 89 protected site/logo/publication/domain records unchanged. Five homepage examples and both Northline domains remain online (HTTP 200). Exact operator-showcase hosting exception preserves Northline without paid-feature entitlements; 12 focused tests passed.
+- Live payments, notification processing, domain processing and refunds remain off.
